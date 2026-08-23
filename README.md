@@ -1,4 +1,4 @@
-<img width="1708" height="1029" alt="image" src="https://github.com/user-attachments/assets/aad9afa5-e1a0-4810-8350-e2459777e00a" /># JJCinemaBackend
+## JJCinemaBackend
 > 영화 예매 서비스 백엔드 프로젝트입니다.
 
 ## 프로젝트 목표
