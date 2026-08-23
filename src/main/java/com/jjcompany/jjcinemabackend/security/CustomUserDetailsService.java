@@ -1,7 +1,7 @@
 package com.jjcompany.jjcinemabackend.security;
 
-import com.jjcompany.jjcinemabackend.user.entity.User;
-import com.jjcompany.jjcinemabackend.user.repository.UserRepository;
+import com.jjcompany.jjcinemabackend.domain.User;
+import com.jjcompany.jjcinemabackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
