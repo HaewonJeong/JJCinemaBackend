@@ -13,29 +13,26 @@
 ## Member
 - 정해원
 
+| 이름 | 담당 | 
+| --- | --- | 
+| 정해원 | Back Developer |
+
 ## 기술 스택
-> JAVA 21/ SPRING BOOT 4.1.0 / PostgresSQL/GRADLE/SPRING DATA JPA (추후 수정)
-- **Language**: Java 21, Kotlin (엔티티 일부)
-- **Framework**: Spring Boot 4.1.0
-  - Spring Web (MVC)
-  - Spring Data JPA (Hibernate ORM)
-  - Spring Security
-- **DB**: PostgreSQL
-- **Build**: Gradle (Groovy DSL)
-- **기타**: Lombok, spring-dotenv(.env 파일 로딩)
+> JAVA 21/ SPRING BOOT 4.1.0 / PostgresSQL/GRADLE/SPRING DATA JPA/ Spring Security (추후 수정)
 
 ## 문서/협업
 > GIT/GITHUB/NOTION/POSTMAIN (추후 수정)
+
 ## ERD
 <img width="1708" height="1029" alt="image" src="https://github.com/user-attachments/assets/284f8d62-d4b3-4d4a-bfac-bda1aa60766e" />
-[ERD 링크]([url](https://www.erdcloud.com/d/XnissnvXBK8n68nhE))
+[ERD 링크](https://www.erdcloud.com/d/XnissnvXBK8n68nhE)
 
 ## 엔티티 설계 컨벤션
 - 엔티티 생성은 Lombok `@Builder` 대신 **정적 팩토리 메서드**(`static create(...)`)를 사용
 
 
 ## Convention
-> 필요할까요? 혼자 개발하는데..
+> 필요할까요? 
 ## 브랜치 구조
 
 ```
@@ -152,7 +149,6 @@ application-local.yml
 - 환경변수 예시 파일(`application-secret.yml.example`, `.env.example`)을 커밋하여 팀원 공유
 - 실수로 민감 정보가 커밋된 경우: **즉시 팀장에게 알리고 키 폐기**
 
-# 필요 X 지울 예정
 
 ## 로컬 실행 방법
 
@@ -190,15 +186,3 @@ DB_PASSWORD=your_db_password
 
 기본 포트는 `8080`입니다.
 
-## API 구현 현황
-
-| 기능 | 엔드포인트 | 비고 |
-| --- | --- | --- |
-| 회원가입 | `POST /api/auth/signup` | |
-| 로그인 | `POST /api/auth/login` | 세션 기반 로그인 |
-| 장르 CRUD | `/api/genres`, `/api/genres/{id}` | GET/POST/DELETE |
-| 관람등급 CRUD | `/api/ratings`, `/api/ratings/{id}` | GET/POST/DELETE |
-
-`/api/auth/**`를 제외한 모든 요청은 인증이 필요합니다(`SecurityConfig`).
-
-`Booking`, `BookingSeat`, `Movie`, `Payment`, `Showtime`은 현재 엔티티만 정의되어 있고, Repository/Service/Controller는 아직 구현되지 않았습니다.
