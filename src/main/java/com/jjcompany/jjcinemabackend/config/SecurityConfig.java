@@ -17,7 +17,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll() //api/auth/** → 로그인 없이 허용,  나머지 모든 API → 로그인 필요
                         .anyRequest().authenticated()
                 );
         return http.build();
