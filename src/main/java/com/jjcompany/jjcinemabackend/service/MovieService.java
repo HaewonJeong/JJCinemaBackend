@@ -1,6 +1,7 @@
 package com.jjcompany.jjcinemabackend.service;
 
 import com.jjcompany.jjcinemabackend.domain.Movie;
+import com.jjcompany.jjcinemabackend.dto.request.MovieRequest;
 import com.jjcompany.jjcinemabackend.dto.response.MovieResponse;
 import com.jjcompany.jjcinemabackend.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,4 +33,11 @@ public class MovieService {
         return MovieResponse.from(movie);
     }
 
+    @Transactional
+    public MovieResponse create(MovieRequest request, String createBy){
+        Movie movie = Movie.create(request.title(), request.genreId(), request.runtime(), request.ratingId(),
+                request.director(), request.releaseDate(), request.posterBase64(), request.synopsis(),
+                request.status(), createBy);
+        return MovieResponse.from(movieRepository.save(movie));
+    }
 }

@@ -74,4 +74,20 @@ public class Movie {
         return new Movie(null, title, genreId, runtime, ratingId, director, releaseDate, posterBase64, synopsis,
                 status, createdBy, null, null, null);
     }
+
+    public void update(String title, Long genreId, Integer runtime, Long ratingId, String director,
+                       LocalDate releaseDate, String posterBase64, String synopsis, String status,
+                       String updatedBy){
+        this.title = title;
+        this.genreId = genreId;
+        this.runtime = runtime;
+        this.ratingId = ratingId;
+        this.director = director;
+        this.releaseDate = releaseDate;
+        this.posterBase64 = posterBase64;
+        this.synopsis = synopsis;
+        this.status = status;
+        this.updatedBy = updatedBy;
+    }
+
 }

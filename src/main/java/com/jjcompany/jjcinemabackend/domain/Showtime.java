@@ -61,4 +61,20 @@ public class Showtime {
                                    String createdBy) {
         return new Showtime(null, movieId, date, time, theater, price, createdBy, null, null, null);
     }
+
+    public void update(LocalDate date, LocalTime
+            time, String theater, Integer price, String updatedBy){
+        if(date != null){
+            this.date = date;
+        }
+        if(time != null){
+            this.time = time;
+        }
+        if(theater != null){
+            this.theater = theater;
+        }
+        if(price != null){
+            this.price = price;
+        }
+    }
 }

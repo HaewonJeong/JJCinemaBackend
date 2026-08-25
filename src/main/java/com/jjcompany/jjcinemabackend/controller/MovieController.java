@@ -1,13 +1,13 @@
 package com.jjcompany.jjcinemabackend.controller;
 
+import com.jjcompany.jjcinemabackend.dto.request.MovieRequest;
 import com.jjcompany.jjcinemabackend.dto.response.MovieResponse;
 import com.jjcompany.jjcinemabackend.service.MovieService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,5 +28,11 @@ public class MovieController {
             @PathVariable Long movieId
     ){
         return ResponseEntity.ok(movieService.getMovie(movieId));
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public MovieResponse create(@RequestBody MovieRequest request, Authentication authentication){
+        return movieService.create(request, authentication.getName());
     }
 }
