@@ -76,5 +76,6 @@ public class Showtime {
         if(price != null){
             this.price = price;
         }
+        this.updatedBy = updatedBy;
     }
 }

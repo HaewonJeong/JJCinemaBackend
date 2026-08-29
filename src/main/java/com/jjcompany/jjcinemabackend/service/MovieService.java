@@ -40,4 +40,16 @@ public class MovieService {
                 request.status(), createBy);
         return MovieResponse.from(movieRepository.save(movie));
     }
+
+    @Transactional
+    public MovieResponse update(Long movieId, MovieRequest request, String updatedBy) {
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new IllegalStateException("영화를 찾을 수 없습니다."));
+
+        movie.update(request.title(), request.genreId(),request.runtime(), request.ratingId(),
+        request.director(), request.releaseDate(), request.posterBase64(), request.synopsis(),
+        request.status(), updatedBy);
+
+        return MovieResponse.from(movie);
+    }
 }

@@ -41,6 +41,6 @@ public class RatingService {
 
     private Rating getRating(Long id) {
         return ratingRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rating not found: " + id));
+                .orElseThrow(() -> new IllegalStateException("등급을 찾을 수 없습니다.: " + id));
     }
 }

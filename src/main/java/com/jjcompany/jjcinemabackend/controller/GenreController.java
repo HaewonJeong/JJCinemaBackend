@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/genres")
 @RequiredArgsConstructor
 public class GenreController {
-
+    //AI 코드. 아직 안읽어봄
     private final GenreService genreService;
 
     @PostMapping

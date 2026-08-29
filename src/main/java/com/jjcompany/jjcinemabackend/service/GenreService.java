@@ -1,21 +1,14 @@
 package com.jjcompany.jjcinemabackend.service;
 
 import com.jjcompany.jjcinemabackend.dto.request.GenreRequest;
-import com.jjcompany.jjcinemabackend.dto.request.SignupRequest;
 import com.jjcompany.jjcinemabackend.dto.response.GenreResponse;
-import com.jjcompany.jjcinemabackend.dto.response.SignupResponse;
 import com.jjcompany.jjcinemabackend.domain.Genre;
-import com.jjcompany.jjcinemabackend.domain.Rating;
 import com.jjcompany.jjcinemabackend.repository.GenreRepository;
 import java.util.List;
 
-import com.jjcompany.jjcinemabackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +40,7 @@ public class GenreService {
 
     private Genre getGenre(Long id) {
         return genreRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Genre not found: " + id));
+                .orElseThrow(() -> new IllegalStateException("장르를 찾을 수 없습니다: " + id));
     }
 
 }

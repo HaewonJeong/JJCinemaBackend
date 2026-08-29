@@ -7,7 +7,7 @@ import java.time.LocalDate;
 public record MovieResponse (
         Long movieId,
         String title,
-        Long genreID,
+        Long genreId,
         Integer runtime,
         Long ratingId,
         String director,

@@ -1,18 +1,18 @@
 package com.jjcompany.jjcinemabackend.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "booking_seats")
+@Table(name = "booking_seats",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_booking_seats_showtime_seat",
+                columnNames = {"showtime_id", "seat_code"}
+        )
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

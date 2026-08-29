@@ -2,6 +2,7 @@ package com.jjcompany.jjcinemabackend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,7 +18,18 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() //api/auth/** → 로그인 없이 허용,  나머지 모든 API → 로그인 필요
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/movies/**", "/api/showtimes/**",
+                                "/api/genres/**", "/api/ratings/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/movies").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/movies/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/genres").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/genres/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/ratings").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/ratings/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/showtimes").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/showtimes/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 );
         return http.build();

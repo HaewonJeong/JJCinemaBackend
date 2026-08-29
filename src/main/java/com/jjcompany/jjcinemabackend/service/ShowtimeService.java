@@ -2,14 +2,13 @@ package com.jjcompany.jjcinemabackend.service;
 
 import com.jjcompany.jjcinemabackend.domain.Movie;
 import com.jjcompany.jjcinemabackend.domain.Showtime;
+import com.jjcompany.jjcinemabackend.dto.request.ShowtimeRequest;
 import com.jjcompany.jjcinemabackend.dto.response.ShowtimeResponse;
 import com.jjcompany.jjcinemabackend.repository.MovieRepository;
 import com.jjcompany.jjcinemabackend.repository.ShowtimeRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class ShowtimeService {
     @Transactional(readOnly = true)
     public ShowtimeResponse getShowtime(Long showtimeId){
         Showtime showtime = showtimeRepository.findById(showtimeId)
-                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "상영 정보를 찾을 수 없습니다."));
+                .orElseThrow( () -> new IllegalStateException("상영 정보를 찾을 수 없습니다."));
         return ShowtimeResponse.from(showtime, getMovieTitle(showtime.getMovieId()));
     }
 
@@ -47,4 +46,18 @@ public class ShowtimeService {
     private String getMovieTitle(Long movieId){
         return movieRepository.findById(movieId).map(Movie::getTitle).orElse("알 수 없음");
     }
+
+    @Transactional
+    public ShowtimeResponse create(ShowtimeRequest request, String createdBy) {
+        Movie movie = movieRepository.findById(request.movieId())
+                .orElseThrow(()-> new IllegalStateException("영화를 찾을 수 없습니다."));
+
+        Showtime showtime = Showtime.create(
+                request.movieId(), request.date(), request.time(),
+                request.theater(), request.price(), createdBy
+        );
+        showtimeRepository.save(showtime);
+        return ShowtimeResponse.from(showtime, movie.getTitle());
+    }
+
 }

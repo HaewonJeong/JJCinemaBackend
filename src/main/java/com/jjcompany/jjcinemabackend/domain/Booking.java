@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -55,5 +57,14 @@ public class Booking {
 
     public static Booking create(Long userId, Long showtimeId, String status, Integer totalPrice) {
         return new Booking(null, userId, showtimeId, status, null, null, totalPrice, null, null);
+    }
+
+    public void cancel(){
+        this.status = "CANCELLED";
+    }
+
+    public void confirm(){
+        this.status = "CONFIRMED";
+        this.bookedAt = LocalDateTime.now();
     }
 }

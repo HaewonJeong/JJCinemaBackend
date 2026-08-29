@@ -1,9 +1,13 @@
 package com.jjcompany.jjcinemabackend.controller;
 
 import com.jjcompany.jjcinemabackend.dto.request.ShowtimeBulkUpdateRequest;
+import com.jjcompany.jjcinemabackend.dto.request.ShowtimeRequest;
 import com.jjcompany.jjcinemabackend.dto.response.ShowtimeResponse;
+import com.jjcompany.jjcinemabackend.global.response.ApiResponse;
 import com.jjcompany.jjcinemabackend.service.ShowtimeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,19 +20,43 @@ public class ShowtimeController {
 
     private final ShowtimeService showtimeService;
 
+    //특정 영화의 상영 회차 목록 조회
     @GetMapping
-    public List<ShowtimeResponse> getShowtimes(@RequestParam Long movieId){
-        return showtimeService.getShowtimesByMovie(movieId);
+    public ResponseEntity<ApiResponse<List<ShowtimeResponse>>> getShowtimes(
+            @RequestParam Long movieId){
+        List<ShowtimeResponse> showtimes = showtimeService.getShowtimesByMovie(movieId);
+        return ResponseEntity.ok(ApiResponse.success(showtimes));
     }
 
+    //상영 회차 하나 조회
     @GetMapping("/{showtimeId}")
-    public ShowtimeResponse getShowtime(@PathVariable Long showtimeId){
-        return showtimeService.getShowtime(showtimeId);
+    public ResponseEntity<ApiResponse<ShowtimeResponse>> getShowtime(
+            @PathVariable Long showtimeId){
+        ShowtimeResponse showtime = showtimeService.getShowtime(showtimeId);
+        return ResponseEntity.ok(ApiResponse.success(showtime));
     }
 
+    //상영회차 등록
+    @PostMapping
+    public ResponseEntity<ApiResponse<ShowtimeResponse>> create(
+            @RequestBody ShowtimeRequest request,
+            Authentication authentication
+    ){
+        ShowtimeResponse response = showtimeService.create(request, authentication.getName());
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success("상영 회차가 등록되었습니다.", response));
+    }
+
+    //여러 회차 일괄 수정
     @PatchMapping("/bulk")
-    public List<ShowtimeResponse> updateBulk(@RequestBody ShowtimeBulkUpdateRequest request, Authentication authentication){
-        return showtimeService.updateBulk(request.showtimeIds(), request.theater(), request.price(), authentication.getName());
-    }
+    public ResponseEntity<ApiResponse<List<ShowtimeResponse>>> updateBulk(
+            @RequestBody ShowtimeBulkUpdateRequest request,
+            Authentication authentication
+    ){
+        List<ShowtimeResponse> updated = showtimeService.updateBulk(
+                request.showtimeIds(), request.theater(), request.price(), authentication.getName());
+        return ResponseEntity.ok(ApiResponse.success("상영 정보가 수정되었습니다.",updated));
 
+    }
 }
