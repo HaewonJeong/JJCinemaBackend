@@ -24,7 +24,7 @@
 > GIT/GITHUB/NOTION/POSTMAIN (추후 수정)
 
 ## ERD
-<img width="1708" height="1029" alt="image" src="https://github.com/user-attachments/assets/284f8d62-d4b3-4d4a-bfac-bda1aa60766e" />
+<img width="1810" height="1096" alt="image" src="https://github.com/user-attachments/assets/b6cdf912-d6bc-495b-bda0-923981c01c3d" />
 [ERD 링크](https://www.erdcloud.com/d/XnissnvXBK8n68nhE)
 
 ## 엔티티 설계 컨벤션
