@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/ratings")
 @RequiredArgsConstructor
 public class RatingController {
-    //AI 코드. 아직 안읽어봄
+
     private final RatingService ratingService;
 
     @PostMapping

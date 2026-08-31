@@ -3,10 +3,12 @@ package com.jjcompany.jjcinemabackend.global.exception;
 import com.jjcompany.jjcinemabackend.global.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.core.AuthenticationException;
 
 /*프로젝트 전체 컨트롤러에 자동으로 적용돼요.
 각 컨트롤러마다 try-catch 넣을 필요 없이, 이 파일 하나만 만들어두면
@@ -52,5 +54,14 @@ public class GlobalExceptionHandler {
         //e.getReason() → "장르를 찾을 수 없습니다"
         //e.getMessage() → "404 NOT_FOUND \"장르를 찾을 수 없습니다\""
         //참고)IllegalStateException엔 getReason()이라는 메서드 자체가 없다.
+    }
+
+    //로그인 실패(비번 틀림) / 비활성 계정 -> 401
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthFailure(AuthenticationException e) {
+        String message = e instanceof DisabledException
+                ? "비활성화된 계정입니다. 관리자에게 문의하세요."
+                : "이메일 또는 비밀번호가 올바르지 않습니다.";
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.fail(message));
     }
 }

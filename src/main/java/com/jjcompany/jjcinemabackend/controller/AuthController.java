@@ -1,8 +1,11 @@
 package com.jjcompany.jjcinemabackend.controller;
 
+import com.jjcompany.jjcinemabackend.domain.User;
 import com.jjcompany.jjcinemabackend.dto.request.LoginRequest;
 import com.jjcompany.jjcinemabackend.dto.request.SignupRequest;
 import com.jjcompany.jjcinemabackend.dto.response.SignupResponse;
+import com.jjcompany.jjcinemabackend.dto.response.UserResponse;
+import com.jjcompany.jjcinemabackend.repository.UserRepository;
 import com.jjcompany.jjcinemabackend.service.AuthService;
 import com.jjcompany.jjcinemabackend.service.GenreService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +32,7 @@ public class AuthController {
     private final AuthService authService;
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository;
+    private final UserRepository userRepository;
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
@@ -37,8 +41,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest request, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        // 이메일/비번 검증
+    public UserResponse login(@RequestBody LoginRequest request, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        // 이메일/비번 검증 (틀리면 AuthenticationException 발생 -> GlobalExceptionHandler가 401로 처리)
         Authentication authResult = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
@@ -48,10 +52,12 @@ public class AuthController {
         context.setAuthentication(authResult);
         // 지금 이 요청 처리 중에는 "로그인된 상태"로 인식되게 설정
         SecurityContextHolder.setContext(context);
-        // 이걸 안 하면 이번 요청에만 로그인 상태이고, 다음 요청부터는 다시 로그아웃 상태가 됨
-        // 여기서 실제로 HTTP 세션(쿠키)에 로그인 상태를 저장함
         securityContextRepository.saveContext(context, httpRequest, httpResponse);
 
-        return "로그인 성공";
+        // 이걸 안 하면 이번 요청에만 로그인 상태이고, 다음 요청부터는 다시 로그아웃 상태가 됨
+        // 여기서 실제로 HTTP 세션(쿠키)에 로그인 상태를 저장함
+        User user = userRepository.findByEmail(request.email())
+                        .orElseThrow(()-> new IllegalStateException("사용자를 찾을 수 없습니다."));
+        return UserResponse.from(user);
     }
 }
