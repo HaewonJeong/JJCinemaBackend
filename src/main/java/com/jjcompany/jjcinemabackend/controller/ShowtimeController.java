@@ -20,7 +20,7 @@ public class ShowtimeController {
 
     private final ShowtimeService showtimeService;
 
-    //특정 영화의 상영 회차 목록 조회
+    //특정 영화의 상영 회차 목록 조회,  /api/showtimes?movieId=
     @GetMapping
     public ResponseEntity<ApiResponse<List<ShowtimeResponse>>> getShowtimes(
             @RequestParam Long movieId){

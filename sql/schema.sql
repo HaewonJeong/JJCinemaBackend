@@ -28,7 +28,7 @@ CREATE TABLE genres (
 );
 
 CREATE TABLE ratings (
-                         rating_id BIGSERIAL PRIMARY KEY,
+                         rating_id BIG. PRIMARY KEY,
                          name VARCHAR(20) NOT NULL UNIQUE
 );
 

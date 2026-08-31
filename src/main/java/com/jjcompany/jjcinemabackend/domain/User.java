@@ -55,4 +55,15 @@ public class User {
     public static User create(String email, String password, String name) {
         return new User(null, email, password, name, "CUSTOMER", true, null, null, null);
     }
+
+    public void updateByAdmin(String role, Boolean active, String updatedBy){
+        if (role != null) {
+            this.role = role;
+        }
+        if(active != null){
+            this.active = active;
+        }
+        this.updatedBy = updatedBy;
+
+    }
 }

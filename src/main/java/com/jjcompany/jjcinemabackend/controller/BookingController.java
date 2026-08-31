@@ -42,23 +42,12 @@ public class BookingController {
 
     //예매 취소
     @DeleteMapping("/{bookingId}")
-    public ResponseEntity<ApiResponse<Void>> candel(
+    public ResponseEntity<ApiResponse<Void>> cancel(
             @PathVariable Long bookingId,
             Authentication authentication
     ){
         bookingService.cancel(bookingId, authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("예매가 취소되었습니다.", null));
     }
-
-    //임시 결제
-    @PatchMapping("/{bookingId}/pay")
-    public ResponseEntity<ApiResponse<BookingResponse>> pay(
-            @PathVariable Long bookingId,
-            Authentication authentication
-    ){
-        BookingResponse response = bookingService.pay(bookingId, authentication.getName());
-        return ResponseEntity.ok(ApiResponse.success("결제가 완료되었습니다.",response));
-    }
-
 
 }

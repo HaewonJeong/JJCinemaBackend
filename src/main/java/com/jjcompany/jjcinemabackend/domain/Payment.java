@@ -49,7 +49,7 @@ public class Payment {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public static Payment create(Long bookingId, Integer amount, String status, String method) {
-        return new Payment(null, bookingId, amount, status, method, null, null, null);
+    public static Payment create(Long bookingId, Integer amount, String status, String method, LocalDateTime paidAt) {
+        return new Payment(null, bookingId, amount, status, method, paidAt, null, null);
     }
 }

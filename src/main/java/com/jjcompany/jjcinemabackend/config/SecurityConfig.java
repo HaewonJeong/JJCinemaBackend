@@ -30,6 +30,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/ratings/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/showtimes").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/showtimes/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 );
         return http.build();
