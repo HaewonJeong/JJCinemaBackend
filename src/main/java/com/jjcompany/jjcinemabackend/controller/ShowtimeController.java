@@ -2,6 +2,7 @@ package com.jjcompany.jjcinemabackend.controller;
 
 import com.jjcompany.jjcinemabackend.dto.request.ShowtimeBulkUpdateRequest;
 import com.jjcompany.jjcinemabackend.dto.request.ShowtimeRequest;
+import com.jjcompany.jjcinemabackend.dto.request.ShowtimeUpdateRequest;
 import com.jjcompany.jjcinemabackend.dto.response.ShowtimeResponse;
 import com.jjcompany.jjcinemabackend.global.response.ApiResponse;
 import com.jjcompany.jjcinemabackend.service.ShowtimeService;
@@ -58,5 +59,16 @@ public class ShowtimeController {
                 request.showtimeIds(), request.theater(), request.price(), authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("상영 정보가 수정되었습니다.",updated));
 
+    }
+
+    //개별 상영 시간 수정
+    @PatchMapping("/{showtimeId}")
+    public ResponseEntity<ApiResponse<ShowtimeResponse>> update(
+            @PathVariable Long showtimeId,
+            @RequestBody ShowtimeUpdateRequest request,
+            Authentication authentication
+    ){
+        ShowtimeResponse response = showtimeService.update(showtimeId, request, authentication.getName());
+        return ResponseEntity.ok(ApiResponse.success("상영 정보가 수정되었습니다.", response));
     }
 }

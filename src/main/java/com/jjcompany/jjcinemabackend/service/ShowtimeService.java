@@ -1,10 +1,14 @@
 package com.jjcompany.jjcinemabackend.service;
 
 import com.jjcompany.jjcinemabackend.domain.Movie;
+import com.jjcompany.jjcinemabackend.domain.Seat;
+import com.jjcompany.jjcinemabackend.domain.SeatLayout;
 import com.jjcompany.jjcinemabackend.domain.Showtime;
 import com.jjcompany.jjcinemabackend.dto.request.ShowtimeRequest;
+import com.jjcompany.jjcinemabackend.dto.request.ShowtimeUpdateRequest;
 import com.jjcompany.jjcinemabackend.dto.response.ShowtimeResponse;
 import com.jjcompany.jjcinemabackend.repository.MovieRepository;
+import com.jjcompany.jjcinemabackend.repository.SeatRepository;
 import com.jjcompany.jjcinemabackend.repository.ShowtimeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,7 @@ public class ShowtimeService {
 
     private final ShowtimeRepository showtimeRepository;
     private final MovieRepository movieRepository;
+    private final SeatRepository seatRepository;
 
     @Transactional(readOnly = true)
     public List<ShowtimeResponse> getShowtimesByMovie(Long movieId){
@@ -57,7 +62,19 @@ public class ShowtimeService {
                 request.theater(), request.price(), createdBy
         );
         showtimeRepository.save(showtime);
+        for (String seatCode : SeatLayout.allSeatCodes()) {
+            seatRepository.save(Seat.create(showtime.getShowtimeId(), seatCode));
+        }
         return ShowtimeResponse.from(showtime, movie.getTitle());
     }
+
+    @Transactional
+    public ShowtimeResponse update(Long showtimeId, ShowtimeUpdateRequest request, String updatedBy) {
+        Showtime showtime = showtimeRepository.findById(showtimeId)
+                .orElseThrow(() -> new IllegalStateException("상영 정보를 찾을 수 없습니다."));
+        showtime.update(request.date(), request.time(), request.theater(), request.price(), updatedBy);
+        return ShowtimeResponse.from(showtime, getMovieTitle(showtime.getMovieId()));
+    }
+
 
 }

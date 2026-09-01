@@ -1,13 +1,12 @@
 package com.jjcompany.jjcinemabackend.service;
 
 import com.jjcompany.jjcinemabackend.domain.Booking;
+import com.jjcompany.jjcinemabackend.domain.BookingSeat;
 import com.jjcompany.jjcinemabackend.domain.Payment;
+import com.jjcompany.jjcinemabackend.domain.Seat;
 import com.jjcompany.jjcinemabackend.dto.request.PaymentRequest;
 import com.jjcompany.jjcinemabackend.dto.response.PaymentResponse;
-import com.jjcompany.jjcinemabackend.repository.BookingRepository;
-import com.jjcompany.jjcinemabackend.repository.BookingSeatRepository;
-import com.jjcompany.jjcinemabackend.repository.PaymentRepository;
-import com.jjcompany.jjcinemabackend.repository.UserRepository;
+import com.jjcompany.jjcinemabackend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -16,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +31,7 @@ public class PaymentService {
     private final BookingRepository bookingRepository;
     private final BookingSeatRepository bookingSeatRepository;
     private final UserRepository userRepository;
+    private final SeatRepository seatRepository;
 
     @Transactional
     public PaymentResponse pay(PaymentRequest request, String email) {
@@ -48,6 +49,14 @@ public class PaymentService {
         if (!STATUS_HELD.equals(booking.getStatus())) {
             throw new IllegalArgumentException("결제 가능한 상태가 아닙니다.");
         }
+        if (booking.getHeldAt().plusMinutes(5).isBefore(LocalDateTime.now())){
+            List<BookingSeat> expired = bookingSeatRepository.findByBookingId(booking.getBookingId());
+            expired.forEach(bs ->
+                    seatRepository.findForUpdate(booking.getShowtimeId(), bs.getSeatCode()).ifPresent(Seat::release));
+            bookingSeatRepository.deleteAll(expired);
+            booking.cancel();
+            throw new IllegalArgumentException("좌석 임시선점 시간이 만료되었습니다. 좌석을 다시 선택해주세요.");
+        }
 
         //결제 성공/실패 여부를 결정 한다.
         boolean succeeded = resolveResult(request.forceResult());
@@ -59,10 +68,16 @@ public class PaymentService {
                         succeeded ? STATUS_SUCCESS : STATUS_FAILED,
                         METHOD_MOCK,
                         succeeded ? LocalDateTime.now() : null));
+
+        List<BookingSeat> bookingSeats = bookingSeatRepository.findByBookingId(booking.getBookingId());
         if (succeeded) {
             booking.confirm();
+            bookingSeats.forEach(bs ->
+                    seatRepository.findForUpdate(booking.getShowtimeId(), bs.getSeatCode()).ifPresent(Seat::confirm));
         } else {
-            bookingSeatRepository.deleteAll(bookingSeatRepository.findByBookingId(booking.getBookingId()));
+            bookingSeats.forEach(bs ->
+                    seatRepository.findForUpdate(booking.getShowtimeId(), bs.getSeatCode()).ifPresent(Seat::release));
+            bookingSeatRepository.deleteAll(bookingSeats);
             booking.cancel();
         }
 

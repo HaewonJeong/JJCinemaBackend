@@ -1,6 +1,7 @@
 package com.jjcompany.jjcinemabackend.controller;
 
 import com.jjcompany.jjcinemabackend.dto.request.BookingCreateRequest;
+import com.jjcompany.jjcinemabackend.dto.response.BookingDetailResponse;
 import com.jjcompany.jjcinemabackend.dto.response.BookingResponse;
 import com.jjcompany.jjcinemabackend.global.response.ApiResponse;
 import com.jjcompany.jjcinemabackend.service.BookingService;
@@ -31,12 +32,22 @@ public class BookingController {
                 .body(ApiResponse.success("좌석이 선점되었습니다.", response));
     }
 
-    //내 예매 목록 조회
-    @GetMapping("/me")
-    public ResponseEntity<ApiResponse<List<BookingResponse>>> getMyBookings(
+    //예매 1건 상세 조회
+    @GetMapping("/{bookingId}")
+    public ResponseEntity<ApiResponse<BookingDetailResponse>> getBookings(
+            @PathVariable Long bookingId,
             Authentication authentication
     ){
-        List<BookingResponse> bookings = bookingService.getMyBookings(authentication.getName());
+        BookingDetailResponse response = bookingService.getBookingDetail(bookingId, authentication.getName());
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    //내 예매 목록 조회
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<List<BookingDetailResponse>>> getMyBookings(
+            Authentication authentication
+    ){
+        List<BookingDetailResponse> bookings = bookingService.getMyBookings(authentication.getName());
         return ResponseEntity.ok(ApiResponse.success(bookings));
     }
 
@@ -49,5 +60,6 @@ public class BookingController {
         bookingService.cancel(bookingId, authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("예매가 취소되었습니다.", null));
     }
+
 
 }

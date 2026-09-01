@@ -18,11 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -59,5 +55,11 @@ public class AuthController {
         User user = userRepository.findByEmail(request.email())
                         .orElseThrow(()-> new IllegalStateException("사용자를 찾을 수 없습니다."));
         return UserResponse.from(user);
+    }
+
+    @GetMapping("/check-email")
+    public java.util.Map<String, Boolean> checkEmail(@RequestParam String email){
+        boolean available = !userRepository.existsByEmail(email);
+        return java.util.Map.of("available", available);
     }
 }
