@@ -11,9 +11,5 @@ import java.util.Optional;
 
 public interface ShowtimeRepository extends JpaRepository<Showtime, Long> {
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select s from Showtime s where s.showtimeId = :showtimeId")
-    Optional<Showtime> findByIdForUpdate(Long showtimeId);
-
     List<Showtime> findByMovieIdOrderByDateAscTimeAsc(Long movieId);
 }

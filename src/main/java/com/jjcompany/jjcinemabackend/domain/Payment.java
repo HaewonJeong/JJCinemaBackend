@@ -52,4 +52,8 @@ public class Payment {
     public static Payment create(Long bookingId, Integer amount, String status, String method, LocalDateTime paidAt) {
         return new Payment(null, bookingId, amount, status, method, paidAt, null, null);
     }
+
+    public void refund() {
+        this.status = "REFUNDED";
+    }
 }

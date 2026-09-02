@@ -63,6 +63,7 @@ public class BookingService {
             if (!seat.isAvailable(HOLD_TIMEOUT_MINUTES)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 선점되었거나 예약된 좌석입니다: " + code);
             }
+            cleanupStaleBookingSeat(showtime.getShowtimeId(), code);
             lockedSeats.add(seat);
         }
         lockedSeats.forEach(Seat::hold);
@@ -72,13 +73,33 @@ public class BookingService {
                 Booking.create(userId, showtime.getShowtimeId(), STATUS_HELD, totalPrice));
 
         for (String seatCode : seatCodes) {
+            bookingSeatRepository.findByShowtimeIdAndSeatCode(showtime.getShowtimeId(), seatCode)
+                    .ifPresent(bookingSeatRepository::delete);
+        }
+        bookingSeatRepository.flush();
+
+        for (String seatCode : seatCodes) {
             bookingSeatRepository.save(
                     BookingSeat.create(booking.getBookingId(), showtime.getShowtimeId(), seatCode));
         }
         return BookingResponse.from(booking, seatCodes);
     }
 
-    //예매 취소(좌석 해제)
+    //만료된 HOLD가 남긴 옛날 booking_seats/Booking 잔여 데이터 정리.
+    //seat.isAvailable()이 true로 확인된 뒤에만 호출되므로, 여기 남아있는 행은 전부 만료된 것으로 간주해도 안전함.
+    private void cleanupStaleBookingSeat(Long showtimeId, String seatCode) {
+        List<BookingSeat> stale = bookingSeatRepository.findByShowtimeId(showtimeId).stream()
+                .filter(bs -> bs.getSeatCode().equals(seatCode))
+                .toList();
+        for (BookingSeat bs : stale) {
+            bookingRepository.findById(bs.getBookingId())
+                    .filter(b -> STATUS_HELD.equals(b.getStatus()))
+                    .ifPresent(Booking::cancel);
+            bookingSeatRepository.delete(bs);
+        }
+    }
+
+    //예매 취소(좌석 해제 + 결제완료였다면 환불 처리)
     @Transactional
     public void cancel(Long bookingId, String email) {
         Long userId = getUserId(email);
@@ -92,11 +113,19 @@ public class BookingService {
             throw new IllegalArgumentException("이미 취소된 예매입니다.");
         }
 
+        boolean wasConfirmed = STATUS_CONFIRMED.equals(booking.getStatus());
+
         List<BookingSeat> bookingSeats = bookingSeatRepository.findByBookingId(bookingId);
         bookingSeats.forEach(bs ->
                 seatRepository.findForUpdate(booking.getShowtimeId(), bs.getSeatCode()).ifPresent(Seat::release));
         bookingSeatRepository.deleteAll(bookingSeats);
         booking.cancel();
+
+        if (wasConfirmed) {
+            paymentRepository.findBookingByBookingId(bookingId)
+                    .filter(p -> "SUCCESS".equals(p.getStatus()))
+                    .ifPresent(Payment::refund);
+        }
     }
 
     //예매 1건 상세 조회 (결제 페이지용)
@@ -161,5 +190,7 @@ public class BookingService {
                     .map(user -> user.getUserId())//user 하나를 받아서 그사람의 id를 꺼내라.
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."));
         }
+
+
 
     }

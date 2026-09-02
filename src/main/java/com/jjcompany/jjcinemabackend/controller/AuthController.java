@@ -10,10 +10,12 @@ import com.jjcompany.jjcinemabackend.service.AuthService;
 import com.jjcompany.jjcinemabackend.service.GenreService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -61,5 +63,23 @@ public class AuthController {
     public java.util.Map<String, Boolean> checkEmail(@RequestParam String email){
         boolean available = !userRepository.existsByEmail(email);
         return java.util.Map.of("available", available);
+    }
+
+    //새로고침 시 로그인 상태 복원용
+    @GetMapping("/me")
+    public UserResponse me(Authentication authentication){
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(()-> new IllegalStateException("사용자를 찾을 수 없습니다."));
+        return UserResponse.from(user);
+    }
+
+    //로그아웃
+    @PostMapping("/logout")
+    public void logout(HttpServletRequest httpRequest){
+        HttpSession session = httpRequest.getSession(false);
+        if(session != null){
+            session.invalidate();
+        }
+        SecurityContextHolder.clearContext();
     }
 }
