@@ -1,6 +1,12 @@
 ## JJCinemaBackend
 > 영화 예매 서비스 백엔드 프로젝트입니다.
 
+## Member
+
+| 이름 | 담당 | 
+| --- | --- | 
+| 정해원 | Back Developer |
+
 ## 프로젝트 목표
 - 백엔드 기본기 학습
 - Restful API 설계 경험
@@ -8,89 +14,136 @@
 - 동시성 이슈 해결 및 성능 최적화
 
 ## 기술 스택
+
+<table>
+<tr>
+<td valign="top" width="50%">
+
 **Backend**
 
-`Java` · `Spring Boot` · `Spring Data JPA (Hibernate)` · `Spring Security (세션 기반 인증)`
+<img src="https://img.shields.io/badge/Java-21-007396?style=for-the-badge&logo=openjdk&logoColor=white"/>
+<img src="https://img.shields.io/badge/Spring%20Boot-4.1.0-6DB33F?style=for-the-badge&logo=springboot&logoColor=white"/>
+<img src="https://img.shields.io/badge/Spring%20Data%20JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white"/>
+<img src="https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white"/>
 
 **Database**
 
-`PostgreSQL`
+<img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white"/>
+<img src="https://img.shields.io/badge/AWS%20RDS-527FFF?style=for-the-badge&logo=amazonrds&logoColor=white"/>
+
+</td>
+<td valign="top" width="50%">
+
+**Infra / DevOps (배포 예정)**
+
+<img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"/>
+<img src="https://img.shields.io/badge/AWS%20EC2-FF9900?style=for-the-badge&logo=amazonec2&logoColor=white"/>
+<img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white"/>
 
 **Frontend (연동)**
 
-`React` · `Vite`
+<img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white"/>
+<img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white"/>
+
+</td>
+</tr>
+</table>
+
+<br>
 영화 예매 서비스의 백엔드 서버입니다. 좌석을 선택해 임시 선점(HOLD) 후 결제까지 진행하는 흐름을 제공하며, 동시에 여러 사용자가 같은 좌석을 예매해도 단 한 명만 성공하도록 좌석 단위 락으로 동시성을 제어하는 것을 핵심으로 합니다.
 
-## 서비스 목표
+## 문서/협업
+> GIT/GITHUB/NOTION/POSTMAIN
+
+## 서비스 소개
 - 영화 목록/상세, 상영 회차, 좌석 배치도를 조회하고 좌석을 선택해 예매합니다.
 - 좌석은 선택 즉시 확정되는 것이 아니라 **5분간 임시 선점(HOLD)** 되며, 그 안에 결제해야 예매가 확정(CONFIRMED)됩니다.
-- 관리자는 별도 화면 없이 동일한 API 서버에서 `hasRole("ADMIN")` 권한 검사로 분리된 엔드포인트를 통해 영화·상영 회차·회원을 관리합니다.
+- 관리자 전용 API는 컨트롤러를 `admin` 패키지·`/api/admin/**` 경로로 분리하고, `SecurityConfig`에서 `.requestMatchers("/api/admin/**").hasRole("ADMIN")` 로 권한을 관리합니다.
 
-## Member
-- 정해원
+**좌석 구성**
+| 구분 | 내용 |
+| --- | --- |
+| 배치 | 5행(A~E) × 8열(1~8), 총 40석 |
+| 상영관당 좌석 | 상영 회차 등록 시 40석 자동 생성 |
+| 임시 선점 시간 | 5분 (초과 시 자동으로 예매 가능 상태로 취급) |
 
-| 이름 | 담당 | 
-| --- | --- | 
-| 정해원 | Back Developer |
+**예매 정책**
+- 로그인한 회원만 예매 가능 (세션 기반 인증)
+- 한 번에 여러 좌석 동시 선점 가능, 중복 좌석 선택 불가
+- 임시 선점(HOLD) 상태에서만 결제 가능, 5분 초과 시 재선택 필요
+- 예매 취소 시 좌석은 즉시 반납되어 다른 사용자가 선택 가능
 
-## 기술 스택
-> JAVA 21/ SPRING BOOT 4.1.0 / PostgresSQL/GRADLE/SPRING DATA JPA/ Spring Security (추후 수정)
+**사용자 흐름**
 
-## 문서/협업
-> GIT/GITHUB/NOTION/POSTMAIN (추후 수정)
 
 ## ERD
+**[ERD 링크]([https://www.erdcloud.com/d/XnissnvXBK8n68nhE)**
 <img width="2390" height="1204" alt="image" src="https://github.com/user-attachments/assets/d3e5de36-3c42-4a8b-99ef-ba0c2ddcdd65" />
 
-[ERD 링크]([https://www.erdcloud.com/d/XnissnvXBK8n68nhE)
-
-## 엔티티 설계 컨벤션
+**엔티티 설계 컨벤션**
 - 엔티티 생성은 Lombok `@Builder` 대신 **정적 팩토리 메서드**(`static create(...)`)를 사용
+**DB 제약조건 / 인덱스**
+- `seats`, `booking_seats`: `UNIQUE(showtime_id, seat_code)` — 같은 상영 회차의 같은 좌석이 중복 저장되지 않도록 DB 레벨에서 강제
+- `payments.booking_id`: `UNIQUE` — 예매 1건당 결제 1건만 허용
+- `showtimes`: `UNIQUE(theater, date, time)` — 같은 상영관·같은 시간대 중복 등록 방지
+- 조회 빈도가 높은 컬럼(`showtime_id`, `movie_id`, `user_id`, `status` 등)에 인덱스 적용
 
 
-## Convention
-> 필요할까요? 
-## 브랜치 구조
+## ⚙️ 동시성 설계
 
+같은 좌석을 여러 사용자가 동시에 예매 요청해도 한 명만 성공하도록, **좌석 단위 비관적 락(`PESSIMISTIC_WRITE`)** 으로 처리합니다.
+<img width="894" height="612" alt="image" src="https://github.com/user-attachments/assets/39b51bb4-fcc5-4219-97fc-14135812cae9" />
+
+**설계 포인트**
+
+- **좌석 단위 락**: 상영 회차 전체가 아니라 좌석 하나하나에 락을 걸어, 서로 다른 좌석을 고른 사용자끼리는 대기 없이 동시에 처리됩니다. (상영 회차 단위로 잠그면 무관한 좌석끼리도 서로 기다리게 되어 실용성이 떨어진다고 판단해 좌석 단위로 재설계했습니다.)
+- **데드락 방지**: 한 번에 여러 좌석을 예매할 때는 좌석 코드를 정렬한 뒤 항상 같은 순서로 락을 겁니다. 두 트랜잭션이 서로 다른 순서로 락을 시도하면 서로의 락을 기다리는 데드락이 발생할 수 있기 때문입니다.
+- **임시 선점 만료(Lazy Expiration)**: 별도 스케줄러 없이, 좌석 상태를 조회하는 시점에 `held_at + 5분`이 지났는지 계산해 만료 여부를 판단합니다.
+- **최후 방어선**: `booking_seats`, `seats`에 걸린 `UNIQUE(showtime_id, seat_code)` 제약이 락으로도 못 막은 예외 상황을 DB 레벨에서 한 번 더 방어합니다.
+
+## API 설계
+
+| 메서드 | 경로 | 설명 | 권한 |
+| --- | --- | --- | --- |
+| POST | `/api/auth/signup` | 회원가입 | 공개 |
+| POST | `/api/auth/login` | 로그인 | 공개 |
+| GET | `/api/auth/me` | 로그인 상태 확인 | 로그인 필요 |
+| POST | `/api/auth/logout` | 로그아웃 | 로그인 필요 |
+| GET | `/api/auth/check-email` | 이메일 중복확인 | 공개 |
+| GET | `/api/movies`, `/api/movies/{id}` | 영화 조회 | 공개 |
+| GET | `/api/showtimes`, `/api/showtimes/{id}` | 상영 조회 | 공개 |
+| GET | `/api/showtimes/{id}/seats` | 좌석 배치도 조회 | 공개 |
+| POST | `/api/bookings` | 좌석 선점(예매 생성) | 로그인 필요 |
+| GET | `/api/bookings/me`, `/api/bookings/{id}` | 내 예매 조회 | 로그인 필요(본인만) |
+| DELETE | `/api/bookings/{id}` | 예매 취소 | 로그인 필요(본인만) |
+| POST | `/api/payments` | 모의 결제 | 로그인 필요 |
+| GET/POST/PATCH/DELETE | `/api/admin/**` | 영화·상영·회원 관리, 통계 | `ROLE_ADMIN` |
+
+**응답 형식**
+
+모든 API는 아래 공통 포맷으로 응답합니다.
+
+```json
+{
+  "success": true,
+  "message": "설명 메시지",
+  "data": {}
+}
 ```
-main
- └── develop
-       ├── feature/BE-login
-       ├── feature/FE-fridge-list
-       ├── fix/BE-recipe-null
-       └── hotfix/FE-token-expire
-```
 
-| 브랜치 | 용도 | 병합 대상 |
-| --- | --- | --- |
-| `main` | 최종 배포 브랜치 | — |
-| `develop` | 통합 개발 브랜치 | `main` |
-| `feature/*` | 기능 개발 | `develop` |
-| `fix/*` | 버그 수정 | `develop` |
-| `hotfix/*` | 긴급 수정 (main 직접) | `main`, `develop` |
-| `docs/*` | 문서 작업 | `develop` |
-| `refactor/*` | 리팩토링 | `develop` |
-## 브랜치 명명 규칙
-> [타입]/[BE 또는 FE]-[기능명]
-- 소문자 + 하이픈(`-`) 사용
-- BE/FE 접두사로 파트 구분 필수
-- 기능명은 영어, 간결하게
-## Commit Convention
-## 커밋 타입
+**오류 코드**
 
-| 타입 | 설명 | 예시 |
-| --- | --- | --- |
-| `feat` | 새 기능 추가 | `feat: 장보기 목록 추가 기능` |
-| `fix` | 버그 수정 | `fix: 로그인 실패 시 메시지 미표시 수정` |
-| `refactor` | 기능 변경 없는 코드 개선 | `refactor: UserService 메서드 분리` |
-| `docs` | 문서 수정 | `docs: README 환경변수 설명 추가` |
-| `test` | 테스트 코드 | `test: 재료 등록 서비스 단위 테스트` |
-| `chore` | 빌드 설정, 의존성 변경 | `chore: QueryDSL 의존성 추가` |
-| `design` | UI/디자인 변경 | `design: 홈 화면 냉파 점수 UI 수정` |
-| `style` | 포맷, 세미콜론 등 (로직 무관) | `style: import 정렬` |
+| HTTP 상태 | 사용 시점 |
+| --- | --- |
+| 400 Bad Request | 입력값 검증 실패 (IllegalArgumentException) — 중복 좌석, 존재하지 않는 좌석 등 |
+| 401 Unauthorized | 로그인하지 않은 상태로 인증 필요한 API 접근 |
+| 403 Forbidden | 본인 소유가 아닌 리소스 접근, 또는 관리자 권한 필요 |
+| 404 Not Found | 리소스를 찾을 수 없음 (IllegalStateException) — 존재하지 않는 예매/영화/회차 등 |
+| 409 Conflict | 좌석 중복 선점, DB 제약 위반 (DataIntegrityViolationException) |
+| 500 Internal Server Error | 그 외 예상하지 못한 서버 오류 |
 
 
-## 프로젝트 구조
+**프로젝트 구조**
 - 프로젝트의 규모가 작아 계층형(ayered Architecture) 구조를 사용 하였습니다.
 ```
 src/main/java/com/jjcompany/jjcinemabackend/
@@ -105,101 +158,35 @@ src/main/java/com/jjcompany/jjcinemabackend/
 ├── security/          # CustomUserDetailsService 등 인증 관련
 └── service/           # 비즈니스 로직
 ```
-## 파일/폴더 명명 규칙
-
-## 공통
-
-| 항목 | 규칙 | 예시 |
-| --- | --- | --- |
-| 패키지/디렉토리 | 소문자, 단수 | `ingredient`, `recipe` |
-| 환경설정 파일 | 소문자 + 하이픈 | `application-dev.yml` |
-| SQL 파일 | 대문자 + 언더스코어 | `V1__CREATE_INGREDIENT_TABLE.sql` |
-
----
-
-## Java / Spring Boot 코드 컨벤션
-
-## 명명 규칙
-
-| 대상 | 규칙 | 예시 |
-| --- | --- | --- |
-| 클래스 | PascalCase | `IngredientService`, `RecipeController` |
-| 메서드/변수 | camelCase | `findByExpiryDate()`, `userId` |
-| 상수 | UPPER_SNAKE_CASE | `MAX_EXPIRY_DAY` |
-| 패키지 | 소문자, 단수 | `com.naengpa.ingredient` |
-| DB 엔티티 | PascalCase + `Entity` 제거 가능 | `Ingredient`, `Recipe` |
+- 관리자 전용 API는 컨트롤러 자체를 admin 패키지·/api/admin/** 경로로 분리해, SecurityConfig에서 메서드별 규칙 없이 .requestMatchers("/api/admin/**").hasRole("ADMIN") 한 줄로 권한을 관리합니다.
 
 ---
 
 ## 예외 처리
-
+- GlobalExceptionHandler 를 적용하여, 각 컨트롤러마다 try-catch 넣을 필요 없이 자동으로 이 핸들러가 예외를 낚아 채서 예외 코드 + ApiResponse.fail(메시지) 형식으로 바꿔 준다.
 - `RuntimeException` 직접 사용 금지 → 커스텀 예외 클래스 사용
 - `@RestControllerAdvice`로 전역 예외 처리 통일
-- 예외 메시지는 한국어 허용 (서비스 특성상)
 
 ```java
-// 커스텀 예외 예시
-public class IngredientNotFoundException extends RuntimeException {
-    public IngredientNotFoundException(Long id) {
-        super("재료를 찾을 수 없습니다. id=" + id);
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotFound(IllegalStateException e){
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.fail(e.getMessage()));
     }
-}
+...
 ```
 
 # 보안 파일 관리 규칙
-- `.env`, `application-secret.yml`, 개인 API 키는 **절대 커밋 금지**
-- `.gitignore`에 반드시 추가:
+- `.env`, 개인 API 키는 **절대 커밋 금지**
+- `.gitignore`에 반드시 추가
 
-```
-# 백엔드
-application-secret.yml
-application-local.yml
-*.key
-
-# 프론트엔드
-.env
-.env.local
-.env.development.local
-.env.production.local
-```
-
-- 환경변수 예시 파일(`application-secret.yml.example`, `.env.example`)을 커밋하여 팀원 공유
-- 실수로 민감 정보가 커밋된 경우: **즉시 팀장에게 알리고 키 폐기**
-
-
-## 로컬 실행 방법
-
-### 1. 사전 준비
-
-- JDK 21
-- PostgreSQL (로컬 또는 원격)
-
-### 2. DB 준비
-
-`sql/schema.sql`을 원하는 PostgreSQL DB에 직접 실행해서 테이블을 생성합니다.
-(Spring Boot가 자동으로 실행해주는 파일이 아니므로 `psql`, DBeaver 등으로 수동 실행 필요)
-
-```
-createdb jjcinema_db
-psql -d jjcinema_db -f sql/schema.sql
-```
-
-### 3. 환경변수 설정
-
-프로젝트 루트에 `.env` 파일을 만들고 아래 값을 채워줍니다. (`.env`는 git에 커밋되지 않습니다)
-
-```
-DB_USERNAME=your_db_username
-DB_PASSWORD=your_db_password
-```
-
-접속 URL은 `src/main/resources/application.yaml`에 `jdbc:postgresql://localhost:5432/jjcinema_db`로 고정되어 있습니다. DB 이름/호스트가 다르면 해당 파일을 직접 수정하세요.
-
-### 4. 서버 실행
-
-```
-./gradlew.bat bootRun
-```
+## 실행 방법
+1. Git Clone 하기
+2. `sql/schema.sql`을 원하는 PostgreSQL DB에 직접 실행해서 테이블을 생성
+3. 백엔드 서버 및 프론트 실행
 
 기본 포트는 `8080`입니다.
 
