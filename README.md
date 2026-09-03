@@ -24,8 +24,9 @@
 > GIT/GITHUB/NOTION/POSTMAIN (추후 수정)
 
 ## ERD
-<img width="1810" height="1096" alt="image" src="https://github.com/user-attachments/assets/b6cdf912-d6bc-495b-bda0-923981c01c3d" />
-[ERD 링크](https://www.erdcloud.com/d/XnissnvXBK8n68nhE)
+<img width="2390" height="1204" alt="image" src="https://github.com/user-attachments/assets/d3e5de36-3c42-4a8b-99ef-ba0c2ddcdd65" />
+
+[ERD 링크]([https://www.erdcloud.com/d/XnissnvXBK8n68nhE)
 
 ## 엔티티 설계 컨벤션
 - 엔티티 생성은 Lombok `@Builder` 대신 **정적 팩토리 메서드**(`static create(...)`)를 사용
