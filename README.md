@@ -7,8 +7,24 @@
 - 상용 서비스의 도메인 분석 및 구현 경험
 - 동시성 이슈 해결 및 성능 최적화
 
-## 프로젝트 문서
-- 준비중
+## 기술 스택
+**Backend**
+
+`Java` · `Spring Boot` · `Spring Data JPA (Hibernate)` · `Spring Security (세션 기반 인증)`
+
+**Database**
+
+`PostgreSQL`
+
+**Frontend (연동)**
+
+`React` · `Vite`
+영화 예매 서비스의 백엔드 서버입니다. 좌석을 선택해 임시 선점(HOLD) 후 결제까지 진행하는 흐름을 제공하며, 동시에 여러 사용자가 같은 좌석을 예매해도 단 한 명만 성공하도록 좌석 단위 락으로 동시성을 제어하는 것을 핵심으로 합니다.
+
+## 서비스 목표
+- 영화 목록/상세, 상영 회차, 좌석 배치도를 조회하고 좌석을 선택해 예매합니다.
+- 좌석은 선택 즉시 확정되는 것이 아니라 **5분간 임시 선점(HOLD)** 되며, 그 안에 결제해야 예매가 확정(CONFIRMED)됩니다.
+- 관리자는 별도 화면 없이 동일한 API 서버에서 `hasRole("ADMIN")` 권한 검사로 분리된 엔드포인트를 통해 영화·상영 회차·회원을 관리합니다.
 
 ## Member
 - 정해원
@@ -24,8 +40,9 @@
 > GIT/GITHUB/NOTION/POSTMAIN (추후 수정)
 
 ## ERD
-<img width="1810" height="1096" alt="image" src="https://github.com/user-attachments/assets/b6cdf912-d6bc-495b-bda0-923981c01c3d" />
-[ERD 링크](https://www.erdcloud.com/d/XnissnvXBK8n68nhE)
+<img width="2390" height="1204" alt="image" src="https://github.com/user-attachments/assets/d3e5de36-3c42-4a8b-99ef-ba0c2ddcdd65" />
+
+[ERD 링크]([https://www.erdcloud.com/d/XnissnvXBK8n68nhE)
 
 ## 엔티티 설계 컨벤션
 - 엔티티 생성은 Lombok `@Builder` 대신 **정적 팩토리 메서드**(`static create(...)`)를 사용
