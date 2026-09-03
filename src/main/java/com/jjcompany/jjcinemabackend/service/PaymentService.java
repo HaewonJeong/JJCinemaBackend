@@ -61,25 +61,18 @@ public class PaymentService {
         //결제 성공/실패 여부를 결정 한다.
         boolean succeeded = resolveResult(request.forceResult());
 
-        Payment payment = paymentRepository.save(
-                Payment.create(
-                        booking.getBookingId(),
-                        booking.getTotalPrice(),
-                        succeeded ? STATUS_SUCCESS : STATUS_FAILED,
-                        METHOD_MOCK,
-                        succeeded ? LocalDateTime.now() : null));
-
-        List<BookingSeat> bookingSeats = bookingSeatRepository.findByBookingId(booking.getBookingId());
-        if (succeeded) {
-            booking.confirm();
-            bookingSeats.forEach(bs ->
-                    seatRepository.findForUpdate(booking.getShowtimeId(), bs.getSeatCode()).ifPresent(Seat::confirm));
-        } else {
-            bookingSeats.forEach(bs ->
-                    seatRepository.findForUpdate(booking.getShowtimeId(), bs.getSeatCode()).ifPresent(Seat::release));
-            bookingSeatRepository.deleteAll(bookingSeats);
-            booking.cancel();
+        if (!succeeded) {
+            //결제 실패해도 좌석/예매는 그대로 유지 — 남은 시간 안에 재시도 가능
+            throw new IllegalArgumentException("결제에 실패했습니다. 다시 시도해주세요.");
         }
+
+        Payment payment = paymentRepository.save(
+                Payment.create(booking.getBookingId(), booking.getTotalPrice(), STATUS_SUCCESS, METHOD_MOCK, LocalDateTime.now()));
+
+        booking.confirm();
+        List<BookingSeat> bookingSeats = bookingSeatRepository.findByBookingId(booking.getBookingId());
+        bookingSeats.forEach(bs ->
+                seatRepository.findForUpdate(booking.getShowtimeId(), bs.getSeatCode()).ifPresent(Seat::confirm));
 
         return PaymentResponse.from(payment, booking.getStatus());
     }

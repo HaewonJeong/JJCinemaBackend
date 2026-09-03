@@ -22,12 +22,6 @@ public class RatingController {
 
     private final RatingService ratingService;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public RatingResponse create(@RequestBody RatingRequest request) {
-        return ratingService.create(request);
-    }
-
     @GetMapping
     public List<RatingResponse> findAll() {
         return ratingService.findAll();
@@ -38,9 +32,4 @@ public class RatingController {
         return ratingService.findById(id);
     }
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        ratingService.delete(id);
-    }
 }

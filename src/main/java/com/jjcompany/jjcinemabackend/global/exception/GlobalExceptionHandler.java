@@ -4,8 +4,8 @@ import com.jjcompany.jjcinemabackend.global.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.core.AuthenticationException;
@@ -63,5 +63,14 @@ public class GlobalExceptionHandler {
                 ? "비활성화된 계정입니다. 관리자에게 문의하세요."
                 : "이메일 또는 비밀번호가 올바르지 않습니다.";
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.fail(message));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleValidation(MethodArgumentNotValidException e){
+        String message = e.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(err -> err.getDefaultMessage())
+                .orElse("잘못된 요청입니다.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(message));
     }
 }

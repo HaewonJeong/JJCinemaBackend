@@ -72,6 +72,7 @@ public class BookingService {
         Booking booking = bookingRepository.save(
                 Booking.create(userId, showtime.getShowtimeId(), STATUS_HELD, totalPrice));
 
+        //booking_seats에 남아있는 옛날 행이 있는지 찾아 지운다.
         for (String seatCode : seatCodes) {
             bookingSeatRepository.findByShowtimeIdAndSeatCode(showtime.getShowtimeId(), seatCode)
                     .ifPresent(bookingSeatRepository::delete);
@@ -139,58 +140,57 @@ public class BookingService {
         return toDetailResponse(booking);
     }
 
-        //내 예매 목록
-        public List<BookingDetailResponse> getMyBookings(String email){
-            Long userId = getUserId(email);
-            return bookingRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
-                    .map(this::toDetailResponse)
-                    .toList();
-        }
-
-        //예매 1건을 화면용 상세 응답으로 조립 (영화/상영/결제 정보까지 합침)
-        private BookingDetailResponse toDetailResponse (Booking booking){
-            List<String> seatCodes = bookingSeatRepository.findByBookingId(booking.getBookingId()).stream()
-                    .map(BookingSeat::getSeatCode)
-                    .toList();
-            Showtime showtime = showtimeRepository.findById(booking.getShowtimeId())
-                    .orElseThrow(() -> new IllegalStateException("상영 정보를 찾을 수 없습니다."));
-            Movie movie = movieRepository.findById(showtime.getMovieId()).orElse(null);
-            LocalDateTime holdExpiresAt = STATUS_HELD.equals(booking.getStatus())
-                    ? booking.getHeldAt().plusMinutes(HOLD_TIMEOUT_MINUTES)
-                    : null;
-            String paymentStatus = paymentRepository.findBookingByBookingId(booking.getBookingId())
-                    .map(Payment::getStatus)
-                    .orElse(null);
-
-            return BookingDetailResponse.from(booking, seatCodes, movie, showtime, holdExpiresAt, paymentStatus);
-        }
-
-        private List<String> validateSeatCodes (List < String > seatCodes) {
-            if (seatCodes == null || seatCodes.isEmpty()) {
-                throw new IllegalArgumentException("좌석을 하나 이상 선택해야 합니다.");
-            }
-            if (new HashSet<>(seatCodes).size() != seatCodes.size()) { //HashSet은 중복을 허용하지 않아, A1 A1 A3 과 같은 입력이 들어왔을때 거름
-                throw new IllegalArgumentException("중복된 좌석이 있습니다.");
-            }
-            for (String code : seatCodes) {
-                if (!SeatLayout.isValid(code)) {
-                    throw new IllegalArgumentException("존재하지 않는 좌석입니다.: " + code);
-                }
-            }
-            return seatCodes;
-        }
-
-        private Showtime getShowtime (Long showtimeId){
-            return showtimeRepository.findById(showtimeId)
-                    .orElseThrow(() -> new IllegalStateException("상영 정보를 찾을 수 없습니다."));
-        }
-
-        private Long getUserId (String email){
-            return userRepository.findByEmail(email)
-                    .map(user -> user.getUserId())//user 하나를 받아서 그사람의 id를 꺼내라.
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."));
-        }
-
-
-
+    //내 예매 목록
+    public List<BookingDetailResponse> getMyBookings(String email) {
+        Long userId = getUserId(email);
+        return bookingRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
+                .map(this::toDetailResponse)
+                .toList();
     }
+
+    //예매 1건을 화면용 상세 응답으로 조립 (영화/상영/결제 정보까지 합침)
+    private BookingDetailResponse toDetailResponse(Booking booking) {
+        List<String> seatCodes = bookingSeatRepository.findByBookingId(booking.getBookingId()).stream()
+                .map(BookingSeat::getSeatCode)
+                .toList();
+        Showtime showtime = showtimeRepository.findById(booking.getShowtimeId())
+                .orElseThrow(() -> new IllegalStateException("상영 정보를 찾을 수 없습니다."));
+        Movie movie = movieRepository.findById(showtime.getMovieId()).orElse(null);
+        LocalDateTime holdExpiresAt = STATUS_HELD.equals(booking.getStatus())
+                ? booking.getHeldAt().plusMinutes(HOLD_TIMEOUT_MINUTES)
+                : null;
+        String paymentStatus = paymentRepository.findBookingByBookingId(booking.getBookingId())
+                .map(Payment::getStatus)
+                .orElse(null);
+
+        return BookingDetailResponse.from(booking, seatCodes, movie, showtime, holdExpiresAt, paymentStatus);
+    }
+
+    private List<String> validateSeatCodes(List<String> seatCodes) {
+        if (seatCodes == null || seatCodes.isEmpty()) {
+            throw new IllegalArgumentException("좌석을 하나 이상 선택해야 합니다.");
+        }
+        if (new HashSet<>(seatCodes).size() != seatCodes.size()) { //HashSet은 중복을 허용하지 않아, A1 A1 A3 과 같은 입력이 들어왔을때 거름
+            throw new IllegalArgumentException("중복된 좌석이 있습니다.");
+        }
+        for (String code : seatCodes) {
+            if (!SeatLayout.isValid(code)) {
+                throw new IllegalArgumentException("존재하지 않는 좌석입니다.: " + code);
+            }
+        }
+        return seatCodes;
+    }
+
+    private Showtime getShowtime(Long showtimeId) {
+        return showtimeRepository.findById(showtimeId)
+                .orElseThrow(() -> new IllegalStateException("상영 정보를 찾을 수 없습니다."));
+    }
+
+    private Long getUserId(String email) {
+        return userRepository.findByEmail(email)
+                .map(user -> user.getUserId())//user 하나를 받아서 그사람의 id를 꺼내라.
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."));
+    }
+
+
+}

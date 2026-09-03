@@ -38,27 +38,4 @@ public class MovieController {
                      movieService.getMovie(movieId)));
     }
 
-    //새 영화 등록
-    @PostMapping
-    public ResponseEntity<ApiResponse<MovieResponse>> create(
-            @RequestBody MovieRequest request,
-            Authentication authentication
-    ){
-        MovieResponse response = movieService.create(request, authentication.getName());
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.success("영화가 등록되었습니다", response));
-    }
-
-    //영화 수정
-    @PatchMapping("/{movieId}")
-    public ResponseEntity<ApiResponse<MovieResponse>> update(
-            @PathVariable Long movieId,
-            @RequestBody MovieRequest request,
-            Authentication authentication
-    ){
-        MovieResponse response = movieService.update(movieId, request, authentication.getName());
-        return ResponseEntity.ok(ApiResponse.success("영화 정보가 수정되었습니다.", response));
-    }
-
 }

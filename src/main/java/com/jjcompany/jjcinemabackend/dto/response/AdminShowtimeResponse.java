@@ -1,6 +1,7 @@
 package com.jjcompany.jjcinemabackend.dto.response;
 
 import com.jjcompany.jjcinemabackend.domain.Showtime;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 

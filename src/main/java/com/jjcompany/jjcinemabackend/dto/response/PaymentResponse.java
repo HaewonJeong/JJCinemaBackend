@@ -1,8 +1,6 @@
 package com.jjcompany.jjcinemabackend.dto.response;
 
 import com.jjcompany.jjcinemabackend.domain.Payment;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record PaymentResponse(

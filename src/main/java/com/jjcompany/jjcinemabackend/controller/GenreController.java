@@ -22,13 +22,7 @@ public class GenreController {
 
     private final GenreService genreService;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public GenreResponse create(@RequestBody GenreRequest request) {
-        return genreService.create(request);
-    }
-
-    @GetMapping
+     @GetMapping
     public List<GenreResponse> findAll() {
         return genreService.findAll();
     }
@@ -38,9 +32,4 @@ public class GenreController {
         return genreService.findById(id);
     }
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        genreService.delete(id);
-    }
 }

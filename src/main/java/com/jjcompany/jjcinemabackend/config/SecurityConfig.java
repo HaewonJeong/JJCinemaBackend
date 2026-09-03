@@ -30,14 +30,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,
                                 "/api/movies/**", "/api/showtimes/**",
                                 "/api/genres/**", "/api/ratings/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/movies").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/movies/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/genres").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/genres/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/ratings").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/ratings/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/showtimes").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/showtimes/**").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 );
