@@ -175,7 +175,7 @@ src/main/java/com/jjcompany/jjcinemabackend/
 ---
 
 ## 예외 처리
-- GlobalExceptionHandler 를 적용하여, 각 컨트롤러마다 try-catch 넣을 필요 없이 자동으로 이 핸들러가 예외를 낚아 채서 예외 코드 + ApiResponse.fail(메시지) 형식으로 바꿔 준다.
+- GlobalExceptionHandler 를 적용하여, 각 컨트롤러마다 try-catch 넣을 필요 없이 자동으로 이 핸들러가 예외를 낚아 채서 예외 코드 + ApiResponse.fail(메시지) 형식으로 변환
 - `RuntimeException` 직접 사용 금지 → 커스텀 예외 클래스 사용
 - `@RestControllerAdvice`로 전역 예외 처리 통일
 
@@ -192,7 +192,7 @@ public class GlobalExceptionHandler {
 ```
 
 # 보안 파일 관리 규칙
-- `.env`, 개인 API 키는 **절대 커밋 금지**
+- `.env`와 같은 개인 API 키는 **절대 커밋 금지**
 - `.gitignore`에 반드시 추가
 
 ## 실행 방법
