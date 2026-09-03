@@ -87,7 +87,7 @@
 - 예매 취소 시 좌석은 즉시 반납되어 다른 사용자가 선택 가능
 
 ## ERD
-**[ERD 링크]([https://www.erdcloud.com/d/XnissnvXBK8n68nhE)**
+**[ERD 링크](https://www.erdcloud.com/d/XnissnvXBK8n68nhE)**
 <img width="2390" height="1204" alt="image" src="https://github.com/user-attachments/assets/d3e5de36-3c42-4a8b-99ef-ba0c2ddcdd65" />
 
 **엔티티 설계 컨벤션**
