@@ -1,17 +1,17 @@
 ## JJCinemaBackend
-> 영화 예매 서비스 백엔드 프로젝트입니다.
+> JJCinema는 영화 예매 서비스의 핵심 동선을 직접 설계하고 해결하는 데 초점을 둔 프로젝트 입니다.
+
+## 프로젝트 목표
+- 백엔드 기본기 학습
+- Restful API 설계 경험
+- 상용 서비스의 도메인 분석 및 구현 경험
+- 계층형 아키텍처, 인증/인가, 동시성 제어, 결제 흐름, 예외 처리, Role 구분을 직접 만들면서 체화
 
 ## Member
 
 | 이름 | 담당 | 
 | --- | --- | 
 | 정해원 | Back Developer |
-
-## 프로젝트 목표
-- 백엔드 기본기 학습
-- Restful API 설계 경험
-- 상용 서비스의 도메인 분석 및 구현 경험
-- 동시성 이슈 해결 및 성능 최적화
 
 ## 기술 스택
 
@@ -24,7 +24,7 @@
 <img src="https://img.shields.io/badge/Java-21-007396?style=for-the-badge&logo=openjdk&logoColor=white"/>
 <img src="https://img.shields.io/badge/Spring%20Boot-4.1.0-6DB33F?style=for-the-badge&logo=springboot&logoColor=white"/>
 <img src="https://img.shields.io/badge/Spring%20Data%20JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white"/>
-<img src="https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white"/>
+<img src="https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white"/> 
 
 **Database**
 
@@ -48,7 +48,6 @@
 </td>
 </tr>
 </table>
-
 <br>
 영화 예매 서비스의 백엔드 서버입니다. 좌석을 선택해 임시 선점(HOLD) 후 결제까지 진행하는 흐름을 제공하며, 동시에 여러 사용자가 같은 좌석을 예매해도 단 한 명만 성공하도록 좌석 단위 락으로 동시성을 제어하는 것을 핵심으로 합니다.
 
@@ -63,7 +62,7 @@
 **좌석 구성**
 | 구분 | 내용 |
 | --- | --- |
-| 배치 | 5행(A~E) × 8열(1~8), 총 40석 |
+| 배치 | 5행(A-E) × 8열(1-8), 총 40석 |
 | 상영관당 좌석 | 상영 회차 등록 시 40석 자동 생성 |
 | 임시 선점 시간 | 5분 (초과 시 자동으로 예매 가능 상태로 취급) |
 
@@ -145,10 +144,11 @@
 
 
 **프로젝트 구조**
-- 프로젝트의 규모가 작아 계층형(ayered Architecture) 구조를 사용 하였습니다.
+- 프로젝트의 규모가 작아 `계층형(layered Architecture)` 구조를 사용 하였습니다.
 ```
 src/main/java/com/jjcompany/jjcinemabackend/
 ├── JJCinemaBackendApplication.java
+├── admin/             # 관리자 컨트롤러
 ├── config/            # SecurityConfig, PasswordConfig 등 설정 클래스
 ├── controller/        # REST 컨트롤러
 ├── domain/            # JPA 엔티티 (Genre, Rating, Booking, Movie, Payment, Showtime, User 등)
@@ -159,7 +159,6 @@ src/main/java/com/jjcompany/jjcinemabackend/
 ├── security/          # CustomUserDetailsService 등 인증 관련
 └── service/           # 비즈니스 로직
 ```
-- 관리자 전용 API는 컨트롤러 자체를 admin 패키지·/api/admin/** 경로로 분리해, SecurityConfig에서 메서드별 규칙 없이 .requestMatchers("/api/admin/**").hasRole("ADMIN") 한 줄로 권한을 관리합니다.
 
 ---
 
