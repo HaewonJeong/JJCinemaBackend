@@ -82,6 +82,7 @@
 
 **엔티티 설계 컨벤션**
 - 엔티티 생성은 Lombok `@Builder` 대신 **정적 팩토리 메서드**(`static create(...)`)를 사용
+
 **DB 제약조건 / 인덱스**
 - `seats`, `booking_seats`: `UNIQUE(showtime_id, seat_code)` — 같은 상영 회차의 같은 좌석이 중복 저장되지 않도록 DB 레벨에서 강제
 - `payments.booking_id`: `UNIQUE` — 예매 1건당 결제 1건만 허용
