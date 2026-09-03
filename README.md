@@ -11,7 +11,7 @@
 
 | 이름 | 담당 | 
 | --- | --- | 
-| 정해원 | Back Developer |
+| 정해원 | BackEnd Developer |
 
 ## 기술 스택
 
@@ -68,7 +68,7 @@
 - 상영 관리: 다중 슬롯 일괄 등록, 개별 수정, 여러 회차 선택 후 일괄 수정(상영관/가격)
 - 회원 관리: 역할(일반/관리자) 변경, 계정 활성/비활성 (본인 계정은 변경 불가)
 
-## 서비스 소개
+## 주요 서비스 흐름
 - 영화 목록/상세, 상영 회차, 좌석 배치도를 조회하고 좌석을 선택해 예매합니다.
 - 좌석은 선택 즉시 확정되는 것이 아니라 **5분간 임시 선점(HOLD)** 되며, 그 안에 결제해야 예매가 확정(CONFIRMED)됩니다.
 - 관리자 전용 API는 컨트롤러를 `admin` 패키지·`/api/admin/**` 경로로 분리하고, `SecurityConfig`에서 `.requestMatchers("/api/admin/**").hasRole("ADMIN")` 로 권한을 관리합니다.
@@ -85,6 +85,8 @@
 - 한 번에 여러 좌석 동시 선점 가능, 중복 좌석 선택 불가
 - 임시 선점(HOLD) 상태에서만 결제 가능, 5분 초과 시 재선택 필요
 - 예매 취소 시 좌석은 즉시 반납되어 다른 사용자가 선택 가능
+<img width="836" height="132" alt="image" src="https://github.com/user-attachments/assets/4258e843-bef7-445a-a1ab-3b15d76e70f7" />
+
 
 ## ERD
 **[ERD 링크](https://www.erdcloud.com/d/XnissnvXBK8n68nhE)**
@@ -190,7 +192,7 @@ public class GlobalExceptionHandler {
 ...
 ```
 
-# 보안 파일 관리 규칙
+## 보안 파일 관리 규칙
 - `.env`와 같은 개인 API 키는 **절대 커밋 금지**
 - `.gitignore`에 반드시 추가
 
