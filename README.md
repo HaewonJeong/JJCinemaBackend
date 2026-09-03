@@ -51,7 +51,7 @@
 <br>
 
 ## 문서/협업
-> GIT/GITHUB/NOTION/POSTMAIN
+> GIT/GITHUB/NOTION/POSTMAN
 ## 주요 기능
 
 **일반 사용자**
@@ -176,7 +176,6 @@ src/main/java/com/jjcompany/jjcinemabackend/
 
 ## 예외 처리
 - GlobalExceptionHandler 를 적용하여, 각 컨트롤러마다 try-catch 넣을 필요 없이 자동으로 이 핸들러가 예외를 낚아 채서 예외 코드 + ApiResponse.fail(메시지) 형식으로 변환
-- `RuntimeException` 직접 사용 금지 → 커스텀 예외 클래스 사용
 - `@RestControllerAdvice`로 전역 예외 처리 통일
 
 ```java
