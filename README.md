@@ -1,5 +1,6 @@
 ## JJCinemaBackend
 > 영화 예매 서비스의 핵심 동선을 직접 설계하고 해결하는 데 초점을 둔 개인 프로젝트 입니다.
+> 접속 URL : jjcinema.vercel.app/
 
 ## 프로젝트 목표
 - 백엔드 기본기 학습
