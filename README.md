@@ -65,7 +65,6 @@
 ## 주요 서비스 흐름
 - 영화 목록/상세, 상영 회차, 좌석 배치도를 조회하고 좌석을 선택해 예매합니다.
 - 좌석은 선택 즉시 확정되는 것이 아니라 **5분간 임시 선점(HOLD)** 되며, 그 안에 결제해야 예매가 확정(CONFIRMED)됩니다.
-- 관리자 전용 API는 컨트롤러를 `admin` 패키지·`/api/admin/**` 경로로 분리하고, `SecurityConfig`에서 `.requestMatchers("/api/admin/**").hasRole("ADMIN")` 로 권한을 관리합니다.
 
 **좌석 구성**
 | 구분 | 내용 |
@@ -126,6 +125,7 @@
 | DELETE | `/api/bookings/{id}` | 예매 취소 | 로그인 필요(본인만) |
 | POST | `/api/payments` | 모의 결제 | 로그인 필요 |
 | GET/POST/PATCH/DELETE | `/api/admin/**` | 영화·상영·회원 관리, 통계 | `ROLE_ADMIN` |
+- 관리자 전용 API는 컨트롤러를 `admin` 패키지·`/api/admin/**` 경로로 분리하고, `SecurityConfig`에서 `.requestMatchers("/api/admin/**").hasRole("ADMIN")` 로 권한을 관리합니다.
 
 **응답 형식**
 
