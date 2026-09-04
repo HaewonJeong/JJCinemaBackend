@@ -171,8 +171,7 @@ src/main/java/com/jjcompany/jjcinemabackend/
 ---
 
 ## 예외 처리
-- GlobalExceptionHandler 를 적용하여, 각 컨트롤러마다 try-catch 넣을 필요 없이 자동으로 이 핸들러가 예외를 낚아 채서 예외 코드 + ApiResponse.fail(메시지) 형식으로 변환
-- `@RestControllerAdvice`로 전역 예외 처리 통일
+- GlobalExceptionHandler 를 적용하여, 각 컨트롤러마다 try-catch 넣을 필요 없이 자동으로 이 핸들러가 예외를 낚아 채서 예외 코드 + ApiResponse.fail(메시지) 형식으로 변환 합니다. (`@RestControllerAdvice`로 전역 예외 처리 통일)
 
 ```java
 @RestControllerAdvice
@@ -194,8 +193,7 @@ public class GlobalExceptionHandler {
 1. Git Clone 하기
 2. `sql/schema.sql`을 원하는 PostgreSQL DB에 직접 실행해서 테이블을 생성
 3. 백엔드 서버 및 프론트 실행
-
-기본 포트는 `8080`입니다.
+- 기본 포트는 `8080`입니다.
 
 ## 시연
 
