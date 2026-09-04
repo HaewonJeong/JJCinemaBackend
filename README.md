@@ -8,9 +8,6 @@
 - 상용 서비스의 도메인 분석 및 구현 경험
 - 계층형 아키텍처, 인증/인가, 동시성 제어, 결제 흐름, 예외 처리, Role 구분을 직접 만들면서 체화
 
-## 멤버
-⚙️**BackEnd Developer** | 정해원
-
 ## 기술 스택
 
 <table>
@@ -262,4 +259,5 @@ public class GlobalExceptionHandler {
 
 ## 시연
 
-
+## 멤버
+⚙️**BackEnd Developer** | 정해원
