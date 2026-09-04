@@ -136,3 +136,11 @@ FROM showtimes s
            ('E1'),('E2'),('E3'),('E4'),('E5'),('E6'),('E7'),('E8')
 ) AS codes(code)
 ON CONFLICT (showtime_id, seat_code) DO NOTHING;
+
+SELECT setval('genres_genre_id_seq', (SELECT MAX(genre_id) FROM genres));
+SELECT setval('ratings_rating_id_seq', (SELECT MAX(rating_id) FROM ratings));
+SELECT setval(pg_get_serial_sequence('genres', 'genre_id'),
+              COALESCE((SELECT MAX(genre_id) FROM genres), 1));
+
+SELECT setval(pg_get_serial_sequence('ratings', 'rating_id'),
+              COALESCE((SELECT MAX(rating_id) FROM ratings), 1));
