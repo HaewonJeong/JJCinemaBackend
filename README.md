@@ -259,3 +259,6 @@ public class GlobalExceptionHandler {
 
 ## 시연
 
+## Member
+⚙️**BackEnd Developer** | 정해원
+
