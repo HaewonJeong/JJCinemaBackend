@@ -17,6 +17,8 @@ public record BookingDetailResponse (
         Integer totalPrice,
         LocalDateTime heldAt,
         LocalDateTime holdExpiresAt,
+        // 임시선점 만료까지 남은 초. 프론트가 절대시각 파싱(타임존 이슈) 대신 이 값으로 카운트다운한다.
+        Long holdRemainingSeconds,
         String movieTitle,
         String moviePosterBase64,
         LocalDate date,
@@ -26,7 +28,7 @@ public record BookingDetailResponse (
 ) {
     public static BookingDetailResponse from(
             Booking booking, List<String> seatCodes, Movie movie, Showtime showtime,
-            LocalDateTime holdExpiresAt, String paymentStatus) {
+            LocalDateTime holdExpiresAt, Long holdRemainingSeconds, String paymentStatus) {
         return new BookingDetailResponse(
                 booking.getBookingId(),
                 booking.getShowtimeId(),
@@ -35,6 +37,7 @@ public record BookingDetailResponse (
                 booking.getTotalPrice(),
                 booking.getHeldAt(),
                 holdExpiresAt,
+                holdRemainingSeconds,
                 movie != null ? movie.getTitle() : "알 수 없음",
                 movie != null ? movie.getPosterBase64() : null,
                 showtime.getDate(),

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -159,11 +160,15 @@ public class BookingService {
         LocalDateTime holdExpiresAt = STATUS_HELD.equals(booking.getStatus())
                 ? booking.getHeldAt().plusMinutes(HOLD_TIMEOUT_MINUTES)
                 : null;
+        // 절대시각(holdExpiresAt)은 서버/클라 타임존이 다르면 어긋난다 → 남은 초를 같이 내려준다.
+        Long holdRemainingSeconds = holdExpiresAt == null
+                ? null
+                : Math.max(0, Duration.between(LocalDateTime.now(), holdExpiresAt).toSeconds());
         String paymentStatus = paymentRepository.findBookingByBookingId(booking.getBookingId())
                 .map(Payment::getStatus)
                 .orElse(null);
 
-        return BookingDetailResponse.from(booking, seatCodes, movie, showtime, holdExpiresAt, paymentStatus);
+        return BookingDetailResponse.from(booking, seatCodes, movie, showtime, holdExpiresAt, holdRemainingSeconds, paymentStatus);
     }
 
     private List<String> validateSeatCodes(List<String> seatCodes) {
