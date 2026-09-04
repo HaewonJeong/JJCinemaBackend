@@ -27,7 +27,7 @@
 </td>
 <td valign="top" width="50%">
 
-**Infra / DevOps **
+**Infra / DevOps**
 
 <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"/>
 <img src="https://img.shields.io/badge/Render-000000?style=for-the-badge&logo=render&logoColor=46E3B7"/>
