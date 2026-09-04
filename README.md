@@ -23,16 +23,14 @@
 **Database**
 
 <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white"/>
-<img src="https://img.shields.io/badge/AWS%20RDS-527FFF?style=for-the-badge&logo=amazonrds&logoColor=white"/>
 
 </td>
 <td valign="top" width="50%">
 
-**Infra / DevOps (배포 예정)**
+**Infra / DevOps**
 
 <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"/>
-<img src="https://img.shields.io/badge/AWS%20EC2-FF9900?style=for-the-badge&logo=amazonec2&logoColor=white"/>
-<img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white"/>
+<img src="https://img.shields.io/badge/Render-000000?style=for-the-badge&logo=render&logoColor=46E3B7"/>
 
 **Frontend (연동)**
 
@@ -97,17 +95,12 @@
 ## ⚙️ 동시성 설계
 
 같은 좌석을 여러 사용자가 동시에 예매 요청해도 한 명만 성공하도록, **좌석 단위 비관적 락(`PESSIMISTIC_WRITE`)** 으로 처리합니다.
-<img width="894" height="612" alt="image" src="https://github.com/user-attachments/assets/39b51bb4-fcc5-4219-97fc-14135812cae9" />
+<img width="475" height="620" alt="image" src="https://github.com/user-attachments/assets/3b7c15d0-438c-4efd-a7c3-c9e741430604" />
+
 
 **설계 포인트**
 
-- **좌석 단위 락**: 상영 회차 전체가 아니라 좌석 하나하나에 락을 걸어, 서로 다른 좌석을 고른 사용자끼리는 대기 없이 동시에 처리됩니다. (상영 회차 단위로 잠그면 무관한 좌석끼리도 서로 기다리게 되어 실용성이 떨어진다고 판단해 좌석 단위로 재설계했습니다.)
-- **데드락 방지**: 한 번에 여러 좌석을 예매할 때는 좌석 코드를 정렬한 뒤 항상 같은 순서로 락을 겁니다. 두 트랜잭션이 서로 다른 순서로 락을 시도하면 서로의 락을 기다리는 데드락이 발생할 수 있기 때문입니다.
-- **점유 상태(occupied) 체크**: 락이 풀린 뒤에도, 좌석이 HOLD 상태인 동안엔 `held_at` 기준 5분이 지나기 전까지 다른 사용자의 선점 시도를 락 경합 없이도 바로 거절합니다. 결제가 실패해도 좌석은 임의로 풀리지 않고 원래 점유자에게 재시도 기회가 남아있습니다.
-- **임시 선점 만료(Lazy Expiration)**: 별도 스케줄러 없이, 좌석 상태를 조회하는 시점에 `held_at + 5분`이 지났는지 계산해 만료 여부를 판단합니다.
-- **DB UNIQUE 제약**: `booking_seats`, `seats`에 걸린 `UNIQUE(showtime_id, seat_code)` 제약이 락으로도 못 막은 예외 상황을 DB 레벨에서 한 번 더 방어합니다.
-
-- **락**: 정확히 같은 순간에 같은 좌석을 두 요청이 동시에 때릴 때만 유효합니다. `SELECT FOR UPDATE`로 행 락을 걸어 하나만 통과시키고, 트랜잭션이 커밋되는 즉시 락은 풀립니다. 즉 락은 "그 찰나의 충돌"만 막을 뿐, 그 이후 상태까지 보장해주지 않습니다.
+- **좌석 단위 락**: 정확히 같은 순간에 같은 좌석을 두 요청이 동시에 때릴 때만 유효합니다. `SELECT FOR UPDATE`로 행 락을 걸어 하나만 통과시키고, 트랜잭션이 커밋되는 즉시 락은 풀립니다. 즉 락은 "그 찰나의 충돌"만 막을 뿐, 그 이후 상태까지 보장해주지 않습니다. **좌석 단위 비관적 락(`PESSIMISTIC_WRITE`)** 으로 처리합니다.
   - **데드락 방지**: 한 번에 여러 좌석을 예매할 때는 좌석 코드를 정렬한 뒤 항상 같은 순서로 락을 겁니다. 예를 들어 사용자 A가 `[C5, C4]`, 사용자 B가 `[C4, C5]` 순서로 동시에 요청해도, 두 트랜잭션 모두 정렬된 순서(C4 → C5)로만 락을 시도하기 때문에 서로 반대 순서로 락을 기다리다 영원히 멈춰버리는 데드락 상황 자체가 발생하지 않습니다.
 - **점유 상태(occupied) 체크**: 락이 풀린 뒤에도, 좌석이 HOLD 상태인 동안엔 `held_at` 기준 5분이 지나기 전까지 다른 사용자의 선점 시도를 락 경합 없이도 바로 거절합니다. 결제가 실패해도 좌석은 임의로 풀리지 않고 원래 점유자에게 재시도 기회가 남아있습니다.
 - **Lazy Expiration(지연 만료)**: 원래 점유자가 5분 넘게 방치하면, 다음 요청이 들어오는 시점에 `held_at` 경과를 계산해 만료로 판단하고 자동으로 좌석을 회수합니다. 별도 스케줄러 없이도, 방치된 점유가 다른 사용자의 새 요청을 영원히 막지 않도록 설계했습니다.
