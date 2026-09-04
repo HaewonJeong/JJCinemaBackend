@@ -251,7 +251,7 @@ public class GlobalExceptionHandler {
 - `.env`와 같은 개인 API 키는 **절대 커밋 금지**
 - `.gitignore`에 반드시 추가
 
-## 실행 방법
+## 로컬 환경 실행
 1. Git Clone 하기
 2. `sql/schema.sql`을 원하는 PostgreSQL DB에 직접 실행해서 테이블을 생성
 3. 백엔드 서버 및 프론트 실행
