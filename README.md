@@ -76,7 +76,17 @@
 - 한 번에 여러 좌석 동시 선점 가능, 중복 좌석 선택 불가
 - 임시 선점(HOLD) 상태에서만 결제 가능, 5분 초과 시 재선택 필요
 - 예매 취소 시 좌석은 즉시 반납되어 다른 사용자가 선택 가능
-<img width="836" height="132" alt="image" src="https://github.com/user-attachments/assets/4258e843-bef7-445a-a1ab-3b15d76e70f7" />
+```mermaid
+flowchart LR
+    A["영화 목록 조회"] --> B["상영 회차 선택"]
+    B --> C["좌석 배치도 조회"]
+    C --> D["좌석 선택 → HOLD"]
+    D --> E["결제"]
+    E -->|성공| F["예매 확정 CONFIRMED"]
+    E -->|실패| G["좌석 반납 · 예매 취소"]
+    H["내 예매 목록"] --> I["예매 상세 조회"]
+    I --> J["예매 취소"]
+```
 
 
 ## ERD
@@ -94,12 +104,41 @@
 
 ## ⚙️ 동시성 설계
 
-같은 좌석을 여러 사용자가 동시에 예매 요청해도 한 명만 성공하도록, **좌석 단위 비관적 락(`PESSIMISTIC_WRITE`)** 으로 처리합니다.
-<img width="475" height="620" alt="image" src="https://github.com/user-attachments/assets/3b7c15d0-438c-4efd-a7c3-c9e741430604" />
-
+```mermaid
+sequenceDiagram
+    participant A as 사용자 A (좌석 C4)
+    participant B as 사용자 B (좌석 C4)
+    participant S as Spring Boot
+    participant DB as PostgreSQL
+    Note over A,DB: [층1] 락 — 선점 순간의 충돌만 막음
+    A->>S: C4 좌석 선점 요청
+    S->>DB: seats SELECT FOR UPDATE (A)
+    DB-->>S: A가 행 락 획득
+    S->>DB: occupied=true, held_at=now 저장 (A)
+    S-->>A: 201 선점 성공
+    Note over S,DB: 트랜잭션 커밋 → 락 즉시 해제
+    Note over A,DB: [층2] 점유 상태 — 락 풀려도 계속 막음
+    A->>S: 결제 요청 (forceResult=FAILED)
+    S->>DB: booking 상태 HELD 유지, Payment 저장 안 함
+    S-->>A: 400 결제 실패 (좌석은 그대로 유지)
+    B->>S: C4 좌석 선점 요청 (락 경합 없이 바로 조회)
+    S->>DB: seats SELECT (C4)
+    DB-->>S: occupied=true, held_at=now-1분
+    S->>S: isAvailable() → 아직 5분 안 지남 → false
+    S-->>B: 409 CONFLICT (이미 선점된 좌석)
+    Note over A,DB: [층3] 5분 지연 만료 — 방치된 점유 회수
+    Note over A: A는 재시도 안 하고 방치 (5분 경과)
+    B->>S: C4 좌석 선점 재요청
+    S->>DB: seats SELECT FOR UPDATE (C4)
+    DB-->>S: occupied=true, held_at=now-5분30초
+    S->>S: isAvailable() → 5분 지남 → true
+    S->>S: cleanupStaleBookingSeat() — A의 잔여 booking_seats 정리
+    S->>DB: occupied=true, held_at=now 갱신 (B)
+    S-->>B: 201 선점 성공
+    Note over A,DB: [층4] UNIQUE(showtime_id, seat_code) — 위 로직이 다 뚫려도 막는 최후 방어선
+```
 
 **설계 포인트**
-
 - **좌석 단위 락**: 정확히 같은 순간에 같은 좌석을 두 요청이 동시에 때릴 때만 유효합니다. `SELECT FOR UPDATE`로 행 락을 걸어 하나만 통과시키고, 트랜잭션이 커밋되는 즉시 락은 풀립니다. 즉 락은 "그 찰나의 충돌"만 막을 뿐, 그 이후 상태까지 보장해주지 않습니다. **좌석 단위 비관적 락(`PESSIMISTIC_WRITE`)** 으로 처리합니다.
   - **데드락 방지**: 한 번에 여러 좌석을 예매할 때는 좌석 코드를 정렬한 뒤 항상 같은 순서로 락을 겁니다. 예를 들어 사용자 A가 `[C5, C4]`, 사용자 B가 `[C4, C5]` 순서로 동시에 요청해도, 두 트랜잭션 모두 정렬된 순서(C4 → C5)로만 락을 시도하기 때문에 서로 반대 순서로 락을 기다리다 영원히 멈춰버리는 데드락 상황 자체가 발생하지 않습니다.
 - **점유 상태(occupied) 체크**: 락이 풀린 뒤에도, 좌석이 HOLD 상태인 동안엔 `held_at` 기준 5분이 지나기 전까지 다른 사용자의 선점 시도를 락 경합 없이도 바로 거절합니다. 결제가 실패해도 좌석은 임의로 풀리지 않고 원래 점유자에게 재시도 기회가 남아있습니다.
@@ -107,7 +146,29 @@
 - **DB UNIQUE 제약**: 위 세 층의 애플리케이션 로직이 버그나 예외 상황으로 전부 무력화되더라도, `UNIQUE(showtime_id, seat_code)` 제약이 DB 레벨에서 중복 저장 자체를 물리적으로 차단하는 최후 방어선입니다.
   
 ## 배포 아키텍쳐
+```mermaid
+flowchart LR
+    A["👤 사용자 브라우저"]:::client
 
+    subgraph V["Vercel"]
+        B["Next.js<br/>JJCinema Frontend"]:::vercel
+    end
+
+    subgraph R["Render"]
+        C["Spring Boot<br/>(Docker Container)"]:::render
+        D[("PostgreSQL<br/>Render Postgres")]:::db
+    end
+
+    A -- "HTTPS" --> B
+    B -- "REST API 호출<br/>(fetch, credentials: include)" --> C
+    C -- "세션 쿠키<br/>(SameSite=None; Secure)" --> B
+    C -- "JPA / Hibernate<br/>PESSIMISTIC_WRITE" --> D
+
+    classDef client fill:#D8F3DC,color:#1B4332,stroke:#52B788,stroke-width:1.5px;
+    classDef vercel fill:#95D5B2,color:#1B4332,stroke:#40916C,stroke-width:1.5px;
+    classDef render fill:#52B788,color:#ffffff,stroke:#2D6A4F,stroke-width:1.5px;
+    classDef db fill:#1B4332,color:#ffffff,stroke:#081C15,stroke-width:1.5px;
+```
 ## API 설계
 
 | 메서드 | 경로 | 설명 | 권한 |
