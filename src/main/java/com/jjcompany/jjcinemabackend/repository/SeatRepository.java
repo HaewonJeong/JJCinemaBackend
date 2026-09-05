@@ -17,5 +17,7 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     @Query("select s from Seat s where s.showtimeId = :showtimeId and s.seatCode = :seatCode")
     Optional<Seat> findForUpdate(Long showtimeId, String seatCode);
     void deleteByShowtimeId(Long showtimeId);
+    //낙관적 락 추가
+    Optional<Seat> findByShowtimeIdAndSeatCode(Long showtimeId, String seatCode);
 
 }

@@ -34,8 +34,13 @@ public class Seat {
     @Column(name = "held_at")
     private LocalDateTime heldAt; // null = 비어있거나 결제완료(영구 점유). 값 있으면 그 시각부터 임시선점 중.
 
+    //낙관적 락 테스트
+    @Version
+    @Column(nullable = false, columnDefinition = "bigint default 0")
+    private Long version;
+
     public static Seat create(Long showtimeId, String seatCode) {
-        return new Seat(null, showtimeId, seatCode, false, null);
+        return new Seat(null, showtimeId, seatCode, false, null, 0L);
     }
 
     // 지금 이 순간 진짜로 예매 가능한지 (5분 지난 HELD는 사실상 빈 자리로 침)

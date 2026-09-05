@@ -9,6 +9,7 @@ import com.jjcompany.jjcinemabackend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -74,6 +75,49 @@ public class BookingService {
                 Booking.create(userId, showtime.getShowtimeId(), STATUS_HELD, totalPrice));
 
         //booking_seats에 남아있는 옛날 행이 있는지 찾아 지운다.
+        for (String seatCode : seatCodes) {
+            bookingSeatRepository.findByShowtimeIdAndSeatCode(showtime.getShowtimeId(), seatCode)
+                    .ifPresent(bookingSeatRepository::delete);
+        }
+        bookingSeatRepository.flush();
+
+        for (String seatCode : seatCodes) {
+            bookingSeatRepository.save(
+                    BookingSeat.create(booking.getBookingId(), showtime.getShowtimeId(), seatCode));
+        }
+        return BookingResponse.from(booking, seatCodes);
+    }
+
+    //낙관적 락 테스트 용
+    @Transactional
+    public BookingResponse holdOptimistic(BookingCreateRequest request, String email) {
+        Long userId = getUserId(email);
+        Showtime showtime = showtimeRepository.findById(request.showtimeId())
+                .orElseThrow(() -> new IllegalStateException("상영 정보를 찾을 수 없습니다."));
+
+        List<String> seatCodes = validateSeatCodes(request.seatCodes());
+        List<Seat> heldSeats = new ArrayList<>();
+
+        for (String code : seatCodes) {
+            Seat seat = seatRepository.findByShowtimeIdAndSeatCode(showtime.getShowtimeId(), code)
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 좌석입니다: " + code));
+            if (!seat.isAvailable(HOLD_TIMEOUT_MINUTES)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 선점되었거나 예약된 좌석입니다: " + code);
+            }
+            cleanupStaleBookingSeat(showtime.getShowtimeId(), code);
+            seat.hold();
+            try {
+                seatRepository.saveAndFlush(seat);
+            } catch (ObjectOptimisticLockingFailureException e) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 선점되었거나 예약된 좌석입니다: " + code);
+            }
+            heldSeats.add(seat);
+        }
+
+        int totalPrice = showtime.getPrice() * seatCodes.size();
+        Booking booking = bookingRepository.save(
+                Booking.create(userId, showtime.getShowtimeId(), STATUS_HELD, totalPrice));
+
         for (String seatCode : seatCodes) {
             bookingSeatRepository.findByShowtimeIdAndSeatCode(showtime.getShowtimeId(), seatCode)
                     .ifPresent(bookingSeatRepository::delete);

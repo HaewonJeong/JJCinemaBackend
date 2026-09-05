@@ -61,5 +61,17 @@ public class BookingController {
         return ResponseEntity.ok(ApiResponse.success("예매가 취소되었습니다.", null));
     }
 
+    //낙관적 락 테스트 용
+    @PostMapping("/optimistic")
+    public ResponseEntity<ApiResponse<BookingResponse>> holdOptimistic(
+            @RequestBody BookingCreateRequest request,
+            Authentication authentication
+    ){
+        BookingResponse response = bookingService.holdOptimistic(request, authentication.getName());
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success("좌석이 선점되었습니다.", response));
+    }
+
 
 }
