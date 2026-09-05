@@ -2,6 +2,11 @@
 > 영화 예매 서비스의 핵심 동선을 직접 설계하고 해결하는 데 초점을 둔 개인 프로젝트 입니다.
 > [(접속 URL)](https://jjcinema.vercel.app) - ID:test@test.com / PW:1234
 
+
+## 시연
+<img width="312" height="240" alt="0905 (1)(4)" src="https://github.com/user-attachments/assets/8ef9d795-0799-4aea-a9b7-b77590045dd5" />
+<img width="312" height="240" alt="0905 (1)(1)" src="https://github.com/user-attachments/assets/5311d432-52af-4ccc-a9c5-22cdf281f2b0" />
+
 ## 프로젝트 목표
 - 백엔드 기본기 학습
 - Restful API 설계 경험
@@ -257,7 +262,15 @@ public class GlobalExceptionHandler {
 3. 백엔드 서버 및 프론트 실행
 - 기본 포트는 `8080`입니다.
 
-## 시연
-
 ## 멤버
 ⚙️**BackEnd Developer** | 정해원
+
+
+
+
+
+
+
+
+
+
