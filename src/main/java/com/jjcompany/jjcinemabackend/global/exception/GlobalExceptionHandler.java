@@ -78,6 +78,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleConflict(DataIntegrityViolationException e){
          return ResponseEntity.status(HttpStatus.CONFLICT)
-                 .body(ApiResponse.fail("다른 데이터와 연결되어 있어 삭제할 수 없습니다."));
+                 .body(ApiResponse.fail("다른 데이터와 충돌이 발생했습니다."));
     }
 }
