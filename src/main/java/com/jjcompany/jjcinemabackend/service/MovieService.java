@@ -5,8 +5,11 @@ import com.jjcompany.jjcinemabackend.dto.request.MovieRequest;
 import com.jjcompany.jjcinemabackend.dto.response.MovieResponse;
 import com.jjcompany.jjcinemabackend.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -51,5 +54,18 @@ public class MovieService {
         request.status(), updatedBy);
 
         return MovieResponse.from(movie);
+    }
+
+    @Transactional
+    public void delete(Long movieId){
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(()-> new IllegalStateException("영화를 찾을 수 없습니다."));
+        try {
+            movieRepository.delete(movie);
+            movieRepository.flush(); // 트랜잭션 끝날 때까지 미루지 않고 지금 바로 FK 위반을 확인
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "등록된 상영이 있어 삭제할 수 없습니다. 상영을 먼저 정리해주세요.");
+        }
     }
 }

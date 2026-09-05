@@ -55,4 +55,11 @@ public class AdminShowtimeController {
         ShowtimeResponse response = showtimeService.update(showtimeId, request, authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("상영 정보가 수정되었습니다.", response));
     }
+
+    //상영 삭제
+    @DeleteMapping("/{showtimeId}")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long showtimeId){
+        showtimeService.delete(showtimeId);
+        return ResponseEntity.ok(ApiResponse.success("상영이 삭제되었습니다.",null));
+    }
 }

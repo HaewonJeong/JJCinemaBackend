@@ -11,8 +11,11 @@ import com.jjcompany.jjcinemabackend.repository.MovieRepository;
 import com.jjcompany.jjcinemabackend.repository.SeatRepository;
 import com.jjcompany.jjcinemabackend.repository.ShowtimeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -74,6 +77,20 @@ public class ShowtimeService {
                 .orElseThrow(() -> new IllegalStateException("상영 정보를 찾을 수 없습니다."));
         showtime.update(request.date(), request.time(), request.theater(), request.price(), updatedBy);
         return ShowtimeResponse.from(showtime, getMovieTitle(showtime.getMovieId()));
+    }
+
+    @Transactional
+    public void delete(Long showtimeId){
+        Showtime showtime = showtimeRepository.findById(showtimeId)
+                .orElseThrow(() -> new IllegalStateException("상영 정보를 찾을 수 없습니다."));
+        seatRepository.deleteByShowtimeId(showtimeId); // seats는 이 상영만 참조하므로 항상 안전하게 먼저 삭제 가능
+        try {
+            showtimeRepository.delete(showtime);
+            showtimeRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "예매 내역이 있어 상영을 삭제할 수 없습니다. 예매를 먼저 정리해주세요.");
+        }
     }
 
 

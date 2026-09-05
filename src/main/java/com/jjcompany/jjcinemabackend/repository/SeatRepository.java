@@ -16,4 +16,6 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select s from Seat s where s.showtimeId = :showtimeId and s.seatCode = :seatCode")
     Optional<Seat> findForUpdate(Long showtimeId, String seatCode);
+    void deleteByShowtimeId(Long showtimeId);
+
 }

@@ -1,6 +1,7 @@
 package com.jjcompany.jjcinemabackend.global.exception;
 
 import com.jjcompany.jjcinemabackend.global.response.ApiResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.DisabledException;
@@ -72,5 +73,11 @@ public class GlobalExceptionHandler {
                 .map(err -> err.getDefaultMessage())
                 .orElse("잘못된 요청입니다.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(message));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleConflict(DataIntegrityViolationException e){
+         return ResponseEntity.status(HttpStatus.CONFLICT)
+                 .body(ApiResponse.fail("다른 데이터와 연결되어 있어 삭제할 수 없습니다."));
     }
 }

@@ -39,4 +39,13 @@ public class AdminMovieController {
         MovieResponse response = movieService.update(movieId, request, authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("영화 정보가 수정되었습니다.", response));
     }
+
+    //영화 삭제
+    @DeleteMapping("/{movieId}")
+    public ResponseEntity<ApiResponse<MovieResponse>> delete(
+            @PathVariable Long movieId
+    ){
+        movieService.delete(movieId);
+        return ResponseEntity.ok(ApiResponse.success("영화 정보가 삭제되었습니다.", null));
+    }
 }
